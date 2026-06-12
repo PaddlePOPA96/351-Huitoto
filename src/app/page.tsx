@@ -129,13 +129,15 @@ const LEAGUE_NAMES: Record<string, string> = {
 export default function GamePage() {
   // --- Loading State ---
   const [playersData, setPlayersData] = useState<Record<string, Player[]>>({});
+  const [playersByNation, setPlayersByNation] = useState<Record<string, Player[]>>({});
   const [clubsList, setClubsList] = useState<string[]>([]);
+  const [nationsList, setNationsList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string>("");
 
   // --- Game State ---
   const [screen, setScreen] = useState<'welcome' | 'formation' | 'draft' | 'league' | 'match' | 'end'>('welcome');
-  const [currentTab, setCurrentTab] = useState<'play' | 'database'>('play');
+  const [currentTab, setCurrentTab] = useState<'landing' | 'play' | 'database'>('landing');
   const [selectedFormationName, setSelectedFormationName] = useState<string>("4-3-3");
   const [draftSlots, setDraftSlots] = useState<DraftSlot[]>([]);
   
@@ -200,18 +202,26 @@ export default function GamePage() {
       })
       .then((data: { players: Player[] }) => {
         const loadedData: Record<string, Player[]> = {};
+        const byNation: Record<string, Player[]> = {};
         const byPosition: Record<string, Player[]> = {};
         
         data.players.forEach(p => {
           const clubName = p.team || "Free Agent";
+          const nationName = p.nationality || "Unknown";
+          
           if (!loadedData[clubName]) {
             loadedData[clubName] = [];
           }
+          if (!byNation[nationName]) {
+            byNation[nationName] = [];
+          }
+          
           const mappedPlayer = {
             ...p,
             club: clubName // Inject club name
           };
           loadedData[clubName].push(mappedPlayer);
+          byNation[nationName].push(mappedPlayer);
 
           // Precompute playersByPosition directly in the single pass
           const ratVal = normalizeRating(p.rat);
@@ -230,7 +240,9 @@ export default function GamePage() {
         });
 
         setPlayersData(loadedData);
+        setPlayersByNation(byNation);
         setClubsList(Object.keys(loadedData).sort());
+        setNationsList(Object.keys(byNation).sort());
         setPlayersByPosition(byPosition);
 
         setIsLoading(false);
@@ -665,6 +677,7 @@ export default function GamePage() {
 
   const handleRestart = () => {
     setScreen('welcome');
+    setCurrentTab('landing');
     setDraftSlots([]);
     setSelectedFormationName("4-3-3");
     setActiveSlotId(null);
@@ -825,6 +838,7 @@ export default function GamePage() {
   const handleResetGame = () => {
     setTournamentType('domestic');
     setScreen('welcome');
+    setCurrentTab('landing');
     setDraftSlots([]);
     setSelectedFormationName("4-3-3");
     setActiveSlotId(null);
@@ -878,76 +892,121 @@ export default function GamePage() {
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-zinc-950 text-white font-sans select-none min-h-screen">
+    <div className="flex flex-col flex-1 bg-slate-50 text-slate-900 font-sans select-none min-h-screen">
       {/* Header bar */}
-      <header className={`sticky top-0 w-full border-b backdrop-blur-md p-4 flex items-center justify-between z-30 px-6 transition-all duration-300 ${
+      <header className={`sticky top-0 w-full border-b backdrop-blur-md p-4 flex items-center justify-between z-30 px-6 sm:px-10 transition-all duration-300 shadow-sm ${
         tournamentType === 'champions' 
-          ? "bg-blue-950/70 border-blue-900/40 shadow-[0_1px_15px_rgba(59,130,246,0.08)]" 
-          : "bg-zinc-950/80 border-zinc-900"
+          ? "bg-gradient-to-r from-blue-900 to-blue-800 border-blue-900 text-white" 
+          : "bg-white border-slate-200"
       }`}>
         <div className="flex items-center gap-2 cursor-pointer" onClick={handleRestart}>
-          <Flame className={`w-6 h-6 ${tournamentType === 'champions' ? "text-blue-400" : "text-saweria"}`} />
-          <span className="font-black tracking-widest text-sm sm:text-base uppercase text-white">
+          <Flame className={`w-6 h-6 ${tournamentType === 'champions' ? "text-yellow-300" : "text-emerald-500"}`} />
+          <span className={`font-black tracking-widest text-sm sm:text-base uppercase ${tournamentType === 'champions' ? "text-white" : "text-slate-800"}`}>
             WEBSCORE
           </span>
         </div>
         <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest border px-3 py-1 rounded-full ${
           tournamentType === 'champions' 
-            ? "text-blue-300 border-blue-900/40 bg-blue-950/30" 
-            : "text-zinc-500 border-zinc-850 bg-zinc-900/40"
+            ? "text-yellow-100 border-yellow-500/40 bg-yellow-500/20" 
+            : "text-emerald-700 border-emerald-200 bg-emerald-50"
         }`}>
           {tournamentType === 'champions' ? "UEFA Champions League" : `${LEAGUE_NAMES[domesticLeague] || "Liga Domestik"}`}
         </span>
       </header>
 
-      {/* Main Container */}
-      <main className="flex-1 flex flex-col p-4 sm:p-6 max-w-7xl w-full mx-auto justify-center">
+      {/* Main Container - Full Page Layout */}
+      <main className="flex-1 flex flex-col p-4 sm:p-6 lg:p-8 w-full max-w-none mx-auto justify-start">
 
-        {/* TOP LEVEL TABS */}
-        <div className="flex justify-center gap-4 mb-6">
-          <button
-            onClick={() => setCurrentTab('play')}
-            className={`px-6 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex items-center gap-2 ${
-              currentTab === 'play'
-                ? "bg-saweria text-black shadow-lg shadow-saweria/20"
-                : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800"
-            }`}
-          >
-            <Play className="w-4 h-4" />
-            Play
-          </button>
-          <button
-            onClick={() => setCurrentTab('database')}
-            className={`px-6 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex items-center gap-2 ${
-              currentTab === 'database'
-                ? "bg-saweria text-black shadow-lg shadow-saweria/20"
-                : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800"
-            }`}
-          >
-            <Search className="w-4 h-4" />
-            Database Pemain
-          </button>
-        </div>
+        {currentTab === 'landing' ? (
+          <div className="flex flex-col items-center justify-center flex-1 py-12 animate-fade-in w-full max-w-6xl mx-auto">
+            <Flame className="w-24 h-24 text-emerald-500 mb-6 animate-bounce" />
+            <h1 className="text-4xl sm:text-7xl font-black uppercase tracking-tight text-slate-800 leading-none text-center mb-4 drop-shadow-sm">
+              WEBSCORE <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400">SIMULATOR</span>
+            </h1>
+            <p className="text-slate-500 text-sm sm:text-lg mb-12 text-center max-w-2xl font-medium">
+              Selamat datang di game manajer sepakbola mini! Pilih mode untuk memulai petualangan membangun klub, atau eksplorasi database pemain dari seluruh dunia.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full px-4">
+              <div 
+                onClick={() => setCurrentTab('play')}
+                className="bg-white border-2 border-slate-200 hover:border-emerald-400 p-10 rounded-[2rem] flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-emerald-100 group"
+              >
+                <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-6 border-4 border-emerald-100 group-hover:bg-emerald-100 group-hover:scale-110 transition-transform">
+                  <Play className="w-10 h-10 text-emerald-500 ml-1" />
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-slate-800 mb-4">Mulai Bermain</h2>
+                <p className="text-slate-500 text-sm sm:text-base leading-relaxed font-medium">
+                  Bentuk skuad impian lewat gacha interaktif, susun formasi taktis, dan bertanding di liga seru menghadapi klub-klub AI terkuat di Eropa.
+                </p>
+              </div>
 
-        {currentTab === 'database' ? (
-          <PlayerDatabaseBrowser playersData={playersData} clubsList={clubsList} />
+              <div 
+                onClick={() => setCurrentTab('database')}
+                className="bg-white border-2 border-slate-200 hover:border-blue-400 p-10 rounded-[2rem] flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-blue-100 group"
+              >
+                <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6 border-4 border-blue-100 group-hover:bg-blue-100 group-hover:scale-110 transition-transform">
+                  <Search className="w-10 h-10 text-blue-500" />
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-slate-800 mb-4">Database Pemain</h2>
+                <p className="text-slate-500 text-sm sm:text-base leading-relaxed font-medium">
+                  Cari pemain berdasarkan klub atau negara. Lihat statistik menyeluruh layaknya Football Manager dan pelajari kekuatan pemain favoritmu.
+                </p>
+              </div>
+            </div>
+          </div>
         ) : (
           <>
-            {/* SCREEN 1: WELCOME SCREEN */}
-        {screen === 'welcome' && (
-          <div className="flex flex-col items-center text-center max-w-2xl mx-auto py-12 gap-8 animate-fade-in">
-            {/* Saweria Yellow Accent Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-saweria/10 border border-saweria/20 rounded-full text-xs font-bold text-saweria uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              Soccer Simulation Game
+            {/* TOP LEVEL TABS */}
+            <div className="flex justify-center gap-4 mb-6">
+              <button
+                onClick={() => setCurrentTab('play')}
+                className={`px-6 py-2.5 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex items-center gap-2 ${
+                  currentTab === 'play'
+                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                    : "bg-white border border-slate-200 text-slate-500 hover:text-emerald-600 hover:border-emerald-200"
+                }`}
+              >
+                <Play className="w-4 h-4" />
+                Play
+              </button>
+              <button
+                onClick={() => setCurrentTab('database')}
+                className={`px-6 py-2.5 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex items-center gap-2 ${
+                  currentTab === 'database'
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
+                    : "bg-white border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200"
+                }`}
+              >
+                <Search className="w-4 h-4" />
+                Database Pemain
+              </button>
             </div>
 
-            {/* Title */}
-            <div className="flex flex-col gap-2">
-              <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-white leading-none">
-                BUILD YOUR <span className="text-saweria">DREAM SQUAD</span>
-              </h1>
-              <p className="text-zinc-500 text-sm sm:text-base leading-relaxed max-w-md mx-auto mt-2">
+            {currentTab === 'database' ? (
+              <PlayerDatabaseBrowser 
+                playersData={playersData} 
+                clubsList={clubsList}
+                playersByNation={playersByNation}
+                nationsList={nationsList} 
+              />
+            ) : (
+              <>
+                {/* SCREEN 1: WELCOME SCREEN */}
+                {screen === 'welcome' && (
+                  <div className="flex flex-col items-center text-center max-w-2xl mx-auto py-12 gap-8 animate-fade-in">
+                    {/* Theme Accent Badge */}
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 border border-emerald-200 rounded-full text-xs font-bold text-emerald-600 uppercase tracking-wider">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Soccer Simulation Game
+                    </div>
+
+                    {/* Title */}
+                    <div className="flex flex-col gap-2">
+                      <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight text-slate-800 leading-none">
+                        BUILD YOUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400">DREAM SQUAD</span>
+                      </h1>
+                      <p className="text-slate-500 text-sm sm:text-base leading-relaxed max-w-md mx-auto mt-2 font-medium">
                 Pilih formasi taktis, rekrut 11 pemain bintang, simulasikan jalannya pertandingan secara langsung, dan menangkan klasemen liga!
               </p>
             </div>
@@ -955,7 +1014,7 @@ export default function GamePage() {
             {/* Action buttons / UI Input */}
             <div className="flex flex-col items-center gap-6 w-full max-w-md mt-2">
               <div className="w-full flex flex-col gap-2">
-                <label className="text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                <label className="text-left text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   Nama Klub Anda
                 </label>
                 <input
@@ -964,13 +1023,13 @@ export default function GamePage() {
                   onChange={(e) => setUserTeamName(e.target.value || "User FC")}
                   maxLength={15}
                   placeholder="Ketik nama klub... (default: User FC)"
-                  className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-saweria transition-all"
+                  className="w-full bg-white border-2 border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 transition-all font-bold shadow-sm"
                 />
               </div>
 
               {/* League Selector Grid */}
               <div className="w-full flex flex-col gap-2">
-                <label className="text-left text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                <label className="text-left text-[10px] font-bold uppercase tracking-wider text-slate-500">
                   Pilih Liga Kompetisi Domestik
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full">
@@ -988,23 +1047,23 @@ export default function GamePage() {
                         key={lg.id}
                         onClick={() => setDomesticLeague(lg.id)}
                         type="button"
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between h-20 ${
+                        className={`p-3 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between h-20 hover:-translate-y-1 ${
                           isSelected
-                            ? "bg-saweria/10 border-saweria text-white shadow-lg shadow-saweria/5"
-                            : "bg-zinc-900 border-zinc-850 text-zinc-400 hover:border-zinc-700 hover:text-white"
+                            ? "bg-emerald-50 border-emerald-400 text-slate-900 shadow-md shadow-emerald-100"
+                            : "bg-white border-slate-200 text-slate-500 hover:border-emerald-300 hover:text-emerald-600 shadow-sm"
                         }`}
                       >
                         <div className="flex justify-between items-center w-full">
                           <span className="text-lg leading-none">{lg.flag}</span>
-                          <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded leading-none ${
-                            isSelected ? "bg-saweria text-black" : "bg-zinc-950 text-zinc-500"
+                          <span className={`text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded leading-none ${
+                            isSelected ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-500"
                           }`}>
                             {lg.id}
                           </span>
                         </div>
                         <div className="flex flex-col mt-1 min-w-0">
                           <span className="text-xs font-black truncate">{lg.name}</span>
-                          <span className="text-[9px] text-zinc-500 font-semibold">{lg.count}</span>
+                          <span className="text-[9px] font-semibold opacity-70">{lg.count}</span>
                         </div>
                       </button>
                     );
@@ -1014,33 +1073,39 @@ export default function GamePage() {
 
               <button
                 onClick={handleStartGame}
-                className="w-full py-3.5 bg-saweria text-black font-black uppercase text-sm rounded-xl hover:bg-saweria-light hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-saweria/15 flex items-center justify-center gap-2 mt-2"
+                className="w-full py-3.5 bg-emerald-500 text-white font-black uppercase text-sm rounded-xl hover:bg-emerald-400 hover:-translate-y-1 active:translate-y-0 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 mt-4"
               >
-                <Play className="w-4 h-4 fill-black" />
+                <Play className="w-5 h-5 fill-white" />
                 Mulai Game
               </button>
             </div>
 
             {/* Quick guide cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full mt-8 text-left">
-              <div className="p-4 bg-zinc-900/40 border border-zinc-900 rounded-xl">
-                <Star className="w-5 h-5 text-saweria mb-2" />
-                <h4 className="text-xs font-bold uppercase text-white tracking-wider">1. Pilih Taktik</h4>
-                <p className="text-zinc-500 text-[11px] leading-relaxed mt-1">
+              <div className="p-5 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mb-3">
+                  <Star className="w-5 h-5 text-amber-500" />
+                </div>
+                <h4 className="text-sm font-black uppercase text-slate-800 tracking-wider">1. Pilih Taktik</h4>
+                <p className="text-slate-500 text-xs leading-relaxed mt-2 font-medium">
                   Tentukan formasi favorit Anda seperti 4-3-3, 4-4-2, atau 3-5-2 untuk memulai.
                 </p>
               </div>
-              <div className="p-4 bg-zinc-900/40 border border-zinc-900 rounded-xl">
-                <User className="w-5 h-5 text-saweria mb-2" />
-                <h4 className="text-xs font-bold uppercase text-white tracking-wider">2. Draft Pemain</h4>
-                <p className="text-zinc-500 text-[11px] leading-relaxed mt-1">
+              <div className="p-5 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                  <User className="w-5 h-5 text-blue-500" />
+                </div>
+                <h4 className="text-sm font-black uppercase text-slate-800 tracking-wider">2. Draft Pemain</h4>
+                <p className="text-slate-500 text-xs leading-relaxed mt-2 font-medium">
                   Gunakan Gacha Klub acak atau saring posisi secara manual untuk mengisi slot formasi.
                 </p>
               </div>
-              <div className="p-4 bg-zinc-900/40 border border-zinc-900 rounded-xl">
-                <Trophy className="w-5 h-5 text-saweria mb-2" />
-                <h4 className="text-xs font-bold uppercase text-white tracking-wider">3. Puncaki Liga</h4>
-                <p className="text-zinc-500 text-[11px] leading-relaxed mt-1">
+              <div className="p-5 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                  <Trophy className="w-5 h-5 text-purple-500" />
+                </div>
+                <h4 className="text-sm font-black uppercase text-slate-800 tracking-wider">3. Puncaki Liga</h4>
+                <p className="text-slate-500 text-xs leading-relaxed mt-2 font-medium">
                   Simulasikan 10 pertandingan secara interaktif dan bersaing dengan klub-klub top.
                 </p>
               </div>
@@ -1052,10 +1117,10 @@ export default function GamePage() {
         {screen === 'formation' && (
           <div className="flex flex-col items-center py-6 gap-6 animate-fade-in max-w-4xl mx-auto w-full">
             <div className="text-center">
-              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-slate-800">
                 PILIH FORMASI & STRATEGI
               </h2>
-              <p className="text-zinc-500 text-xs sm:text-sm mt-1">
+              <p className="text-slate-500 font-medium text-xs sm:text-sm mt-2">
                 Formasi akan menentukan jumlah slot posisi yang harus Anda isi dalam squad draft.
               </p>
             </div>
@@ -1073,34 +1138,34 @@ export default function GamePage() {
                   <button
                     key={name}
                     onClick={() => handleSelectFormation(name)}
-                    className="bg-zinc-900/50 border border-zinc-850 hover:border-saweria hover:bg-zinc-900 rounded-2xl p-5 text-left transition-all duration-300 group focus:outline-none flex flex-col gap-4 shadow-lg hover:shadow-saweria/5 hover:scale-[1.02]"
+                    className="bg-white border-2 border-slate-200 hover:border-emerald-400 rounded-2xl p-6 text-left transition-all duration-300 group focus:outline-none flex flex-col gap-5 shadow-sm hover:shadow-lg hover:shadow-emerald-100 hover:-translate-y-1"
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="text-lg font-black tracking-wider text-white group-hover:text-saweria">
+                      <span className="text-lg font-black tracking-wider text-slate-800 group-hover:text-emerald-500">
                         Taktik {name}
                       </span>
-                      <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-saweria" />
+                      <ChevronRight className="w-6 h-6 text-slate-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-transform" />
                     </div>
 
-                    <div className="flex gap-4 text-xs font-semibold text-zinc-400">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase text-zinc-600 font-bold">Defenders</span>
-                        <span className="text-white mt-0.5">{defCount} Bek</span>
+                    <div className="flex gap-4 text-xs font-semibold text-slate-600 w-full justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <div className="flex flex-col text-center w-full">
+                        <span className="text-[9px] uppercase text-slate-400 font-bold mb-1">Defenders</span>
+                        <span className="text-emerald-600 font-black text-sm">{defCount}</span>
                       </div>
-                      <div className="border-l border-zinc-800 h-6 shrink-0" />
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase text-zinc-600 font-bold">Midfielders</span>
-                        <span className="text-white mt-0.5">{midCount} Gelandang</span>
+                      <div className="border-l border-slate-200 shrink-0" />
+                      <div className="flex flex-col text-center w-full">
+                        <span className="text-[9px] uppercase text-slate-400 font-bold mb-1">Midfielders</span>
+                        <span className="text-blue-500 font-black text-sm">{midCount}</span>
                       </div>
-                      <div className="border-l border-zinc-800 h-6 shrink-0" />
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase text-zinc-600 font-bold">Attackers</span>
-                        <span className="text-white mt-0.5">{attCount} Striker</span>
+                      <div className="border-l border-slate-200 shrink-0" />
+                      <div className="flex flex-col text-center w-full">
+                        <span className="text-[9px] uppercase text-slate-400 font-bold mb-1">Attackers</span>
+                        <span className="text-rose-500 font-black text-sm">{attCount}</span>
                       </div>
                     </div>
 
                     {/* Small tactical text map */}
-                    <div className="text-[10px] text-zinc-500 font-bold bg-black/40 p-2 rounded-lg truncate w-full">
+                    <div className="text-[10px] text-slate-500 font-bold bg-slate-100 border border-slate-200 p-2.5 rounded-lg truncate w-full text-center tracking-widest">
                       {form.slots.map(s => s.position).join(" • ")}
                     </div>
                   </button>
@@ -1115,8 +1180,8 @@ export default function GamePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-4 animate-fade-in w-full">
             
             {/* Left Column: visual interactive pitch */}
-            <div className="lg:col-span-7 flex flex-col items-center">
-              <div className="w-full max-w-md lg:max-w-none">
+            <div className="lg:col-span-7 flex flex-col items-center justify-center">
+              <div className="w-full max-w-[320px] sm:max-w-[400px] lg:max-w-[450px] mx-auto">
                 <FootballPitch
                   draftSlots={draftSlots}
                   onSlotClick={handleSlotClick}
@@ -1129,30 +1194,30 @@ export default function GamePage() {
             <div className="lg:col-span-5 flex flex-col gap-6">
               
               {/* Squad Rating Dashboard */}
-              <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-5 flex flex-col gap-4">
-                <h3 className="font-bold text-zinc-400 text-xs sm:text-sm uppercase tracking-wider">
+              <div className="bg-white border-2 border-slate-200 shadow-sm rounded-2xl p-6 flex flex-col gap-5">
+                <h3 className="font-bold text-slate-500 text-xs sm:text-sm uppercase tracking-wider">
                   Statistik Skuad Saya
                 </h3>
 
                 <div className="flex items-center justify-between gap-4">
                   {/* Average Rating Circle */}
                   <div className="flex items-center gap-3">
-                    <div className="w-16 h-16 rounded-2xl bg-zinc-950 border border-zinc-800 flex flex-col items-center justify-center shrink-0">
-                      <span className="text-2xl font-black text-saweria leading-none font-mono">
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-50 border-2 border-emerald-100 flex flex-col items-center justify-center shrink-0">
+                      <span className="text-2xl font-black text-emerald-600 leading-none font-mono">
                         {userSquadRating}
                       </span>
-                      <span className="text-[8px] font-bold uppercase text-zinc-500 mt-1">OVR RAT</span>
+                      <span className="text-[8px] font-bold uppercase text-emerald-500 mt-1">OVR RAT</span>
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-white tracking-wide truncate max-w-[150px]">
+                      <h4 className="text-sm font-bold text-slate-800 tracking-wide truncate max-w-[150px]">
                         {userTeamName}
                       </h4>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase">
                           Formasi: {selectedFormationName}
                         </span>
-                        <span className="text-zinc-700">•</span>
-                        <span className="text-[10px] font-bold text-saweria bg-saweria/10 px-1.5 rounded uppercase">
+                        <span className="text-slate-300">•</span>
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded uppercase">
                           {totalDraftedCount} / 11 Pemain
                         </span>
                       </div>
@@ -1161,15 +1226,15 @@ export default function GamePage() {
 
                   {/* Stars indicators */}
                   <div className="flex flex-col items-end">
-                    <div className="flex gap-0.5 text-saweria">
+                    <div className="flex gap-0.5 text-yellow-400">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${i < starRating ? "fill-saweria" : "text-zinc-800"}`}
+                          className={`w-4 h-4 ${i < starRating ? "fill-yellow-400" : "text-slate-200"}`}
                         />
                       ))}
                     </div>
-                    <span className="text-[9px] font-black uppercase text-zinc-500 mt-1.5">
+                    <span className="text-[9px] font-black uppercase text-slate-400 mt-1.5">
                       TIER: {starRating === 5 ? "SUPERIOR" : starRating === 4 ? "ELITE" : starRating === 3 ? "MEDIUM" : "UNDERDOG"}
                     </span>
                   </div>
@@ -1179,43 +1244,43 @@ export default function GamePage() {
                 <button
                   disabled={totalDraftedCount < 11}
                   onClick={handleGenerateLeague}
-                  className="w-full py-3.5 bg-saweria text-black font-extrabold uppercase text-xs sm:text-sm rounded-xl hover:bg-saweria-light active:scale-95 disabled:bg-zinc-900 disabled:border disabled:border-zinc-850 disabled:text-zinc-600 disabled:scale-100 transition-all duration-200 shadow-xl shadow-saweria/10 mt-2 flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-emerald-500 text-white font-extrabold uppercase text-xs sm:text-sm rounded-xl hover:bg-emerald-400 active:translate-y-0 hover:-translate-y-1 disabled:bg-slate-100 disabled:border disabled:border-slate-200 disabled:text-slate-400 disabled:scale-100 transition-all duration-200 shadow-lg shadow-emerald-200 mt-2 flex items-center justify-center gap-2"
                 >
-                  <Trophy className="w-4 h-4 fill-black" />
+                  <Trophy className="w-5 h-5 fill-white" />
                   Kunci Skuad & Generate Liga
                 </button>
               </div>
 
               {/* Slot list selection panel */}
-              <div className="bg-zinc-900/20 border border-zinc-900 rounded-2xl flex flex-col flex-1 min-h-[300px] overflow-hidden">
-                <div className="p-4 bg-zinc-900/40 border-b border-zinc-900 flex justify-between items-center">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+              <div className="bg-white border-2 border-slate-200 shadow-sm rounded-2xl flex flex-col flex-1 min-h-[300px] overflow-hidden">
+                <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                     Daftar Slot Formasi
                   </span>
                   <button
                     onClick={handleRestart}
-                    className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors flex items-center gap-1 uppercase"
+                    className="text-[10px] font-bold text-slate-400 hover:text-emerald-500 transition-colors flex items-center gap-1 uppercase"
                   >
                     <RotateCcw className="w-3.5 h-3.5" /> Ganti Formasi
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto max-h-[350px] p-4 space-y-2.5 divide-y divide-zinc-900/40">
+                <div className="flex-1 overflow-y-auto max-h-[350px] p-4 space-y-2.5 divide-y divide-slate-100">
                   {draftSlots.map((slot) => {
                     const hasPlayer = slot.player !== null;
                     return (
                       <div 
                         key={slot.id}
                         className={`flex items-center justify-between gap-4 pt-2.5 first:pt-0 ${
-                          activeSlotId === slot.id ? "bg-zinc-900/20 p-2 rounded-lg border border-zinc-800" : ""
+                          activeSlotId === slot.id ? "bg-slate-50 p-2 rounded-lg border border-slate-200" : ""
                         }`}
                       >
                         {/* Slot Position Title */}
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black uppercase tracking-wider shrink-0 ${
                             hasPlayer 
-                              ? "bg-saweria/10 text-saweria border border-saweria/20" 
-                              : "bg-zinc-900 text-zinc-500 border border-zinc-850"
+                              ? "bg-emerald-50 text-emerald-600 border border-emerald-200" 
+                              : "bg-slate-100 text-slate-400 border border-slate-200"
                           }`}>
                             {slot.position}
                           </div>
@@ -1223,15 +1288,15 @@ export default function GamePage() {
                           <div className="min-w-0 flex flex-col">
                             {hasPlayer ? (
                               <>
-                                <span className="text-xs font-bold text-white truncate max-w-[120px] sm:max-w-[180px]">
+                                <span className="text-xs font-bold text-slate-800 truncate max-w-[120px] sm:max-w-[180px]">
                                   {slot.player?.name}
                                 </span>
-                                <span className="text-[10px] text-zinc-500 truncate mt-0.5">
+                                <span className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
                                   {slot.player?.nationality} • OVR {normalizeRating(slot.player!.rat)}
                                 </span>
                               </>
                             ) : (
-                              <span className="text-xs text-zinc-500 italic">
+                              <span className="text-xs text-slate-400 italic">
                                 Belum dipilih
                               </span>
                             )}
@@ -1243,14 +1308,14 @@ export default function GamePage() {
                           {hasPlayer ? (
                             <button
                               onClick={() => handleSlotClick(slot.id)}
-                              className="text-[10px] font-bold text-zinc-400 hover:text-saweria border border-zinc-800 bg-zinc-900 hover:bg-zinc-950 px-3 py-1 rounded transition-all"
+                              className="text-[10px] font-bold text-slate-500 hover:text-blue-500 border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 rounded-lg transition-all shadow-sm"
                             >
                               Ganti
                             </button>
                           ) : (
                             <button
                               onClick={() => handleSlotClick(slot.id)}
-                              className="text-[10px] font-bold text-black bg-saweria hover:bg-saweria-light px-3 py-1 rounded transition-all shadow shadow-saweria/5"
+                              className="text-[10px] font-bold text-white bg-emerald-500 hover:bg-emerald-400 px-3 py-1.5 rounded-lg transition-all shadow-sm"
                             >
                               Draft
                             </button>
@@ -1297,29 +1362,29 @@ export default function GamePage() {
               
               {/* User Matchday Match Fixture Card */}
               {userFixtureInCurrentRound ? (
-                <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-5 flex flex-col gap-4 relative overflow-hidden">
+                <div className="bg-white border-2 border-slate-200 shadow-sm rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden">
                   
                   {/* Background glowing glow */}
-                  <div className="absolute -top-12 -right-12 w-24 h-24 bg-saweria/5 rounded-full blur-2xl pointer-events-none" />
+                  <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-100 rounded-full blur-2xl pointer-events-none" />
 
                   {/* Header info */}
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4 text-saweria" />
+                    <span className="text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-emerald-500" />
                       Pekan Kompetisi {currentRoundIdx + 1}
                     </span>
-                    <span className="text-[10px] text-saweria bg-saweria/10 px-2 py-0.5 rounded font-black">
+                    <span className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded font-black">
                       NEXT MATCH
                     </span>
                   </div>
 
                   {/* Team vs Team Layout */}
-                  <div className="flex items-center justify-between border-y border-zinc-900/60 py-4 mt-1 font-sans">
+                  <div className="flex items-center justify-between border-y border-slate-100 py-4 mt-1 font-sans">
                     <div className="flex flex-col items-center flex-1 min-w-0">
-                      <span className="text-white text-xs sm:text-sm font-bold truncate max-w-full">
+                      <span className="text-slate-800 text-xs sm:text-sm font-bold truncate max-w-full">
                         {userFixtureInCurrentRound.home}
                       </span>
-                      <span className="text-[10px] text-zinc-500 font-bold mt-1 uppercase">
+                      <span className="text-[10px] text-slate-500 font-bold mt-1 uppercase">
                         {userFixtureInCurrentRound.home === userTeamName 
                           ? `OVR ${userSquadRating}` 
                           : `OVR ${calculateSquadRating(aiSquads[userFixtureInCurrentRound.home] || [])}`
@@ -1328,16 +1393,16 @@ export default function GamePage() {
                     </div>
 
                     <div className="px-4 text-center shrink-0">
-                      <span className="text-xs font-black bg-zinc-950 border border-zinc-850 px-3 py-1.5 rounded-lg text-zinc-400">
+                      <span className="text-xs font-black bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-slate-500">
                         VS
                       </span>
                     </div>
 
                     <div className="flex flex-col items-center flex-1 min-w-0">
-                      <span className="text-white text-xs sm:text-sm font-bold truncate max-w-full">
+                      <span className="text-slate-800 text-xs sm:text-sm font-bold truncate max-w-full">
                         {userFixtureInCurrentRound.away}
                       </span>
-                      <span className="text-[10px] text-zinc-500 font-bold mt-1 uppercase">
+                      <span className="text-[10px] text-slate-500 font-bold mt-1 uppercase">
                         {userFixtureInCurrentRound.away === userTeamName 
                           ? `OVR ${userSquadRating}` 
                           : `OVR ${calculateSquadRating(aiSquads[userFixtureInCurrentRound.away] || [])}`
@@ -1347,19 +1412,19 @@ export default function GamePage() {
                   </div>
 
                   {/* Simulation launcher */}
-                  <div className="flex flex-col gap-2 mt-1">
+                  <div className="flex flex-col gap-3 mt-2">
                     <button
                       onClick={handleStartMatchSimulation}
                       disabled={isSimulatingSeason}
-                      className="w-full py-3 bg-saweria disabled:bg-zinc-800 disabled:text-zinc-650 disabled:border disabled:border-zinc-850 disabled:cursor-not-allowed text-black font-black uppercase text-xs sm:text-sm rounded-xl hover:bg-saweria-light active:scale-95 transition-all shadow-xl shadow-saweria/10 flex items-center justify-center gap-2"
+                      className="w-full py-3.5 bg-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 disabled:border disabled:border-slate-200 disabled:cursor-not-allowed text-white font-black uppercase text-xs sm:text-sm rounded-xl hover:bg-emerald-400 active:translate-y-0 hover:-translate-y-1 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2"
                     >
-                      <Play className="w-4 h-4 fill-black" />
+                      <Play className="w-4 h-4 fill-white" />
                       {isSimulatingSeason ? "Simulasi Sedang Berjalan..." : "Simulasikan Pertandingan"}
                     </button>
                     <button
                       onClick={handleSkipSeason}
                       disabled={isSimulatingSeason}
-                      className="w-full py-2 bg-zinc-900 border border-zinc-800 hover:bg-zinc-850 disabled:bg-zinc-950 disabled:text-zinc-700 disabled:border-zinc-900 disabled:cursor-not-allowed text-white font-bold uppercase text-[10px] sm:text-xs rounded-xl active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                      className="w-full py-2.5 bg-white border-2 border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 disabled:border-slate-100 disabled:cursor-not-allowed text-slate-600 font-bold uppercase text-[10px] sm:text-xs rounded-xl active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm"
                     >
                       <FastForward className="w-3.5 h-3.5" />
                       {isSimulatingSeason ? "Mensimulasikan Sisa Musim..." : "Simulasikan Sisa Musim (Skip)"}
@@ -1369,20 +1434,20 @@ export default function GamePage() {
                 </div>
               ) : (
                 // User has BYE in this round (since odd number of teams)
-                <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-5 flex flex-col gap-4 text-center items-center justify-center">
-                  <ShieldAlert className="w-10 h-10 text-saweria animate-pulse mb-1" />
+                <div className="bg-white border-2 border-slate-200 shadow-sm rounded-2xl p-6 flex flex-col gap-4 text-center items-center justify-center">
+                  <ShieldAlert className="w-10 h-10 text-slate-300 animate-bounce mb-1" />
                   <div className="flex flex-col">
-                    <h4 className="text-sm font-bold text-white uppercase tracking-wide">
+                    <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
                       Pekan Istirahat (BYE)
                     </h4>
-                    <p className="text-zinc-500 text-xs leading-relaxed max-w-xs mt-1">
+                    <p className="text-slate-500 font-medium text-xs leading-relaxed max-w-xs mt-1">
                       Tim Anda tidak memiliki pertandingan pada pekan ini. Klik di bawah untuk mensimulasikan laga tim-tim AI lainnya secara instan.
                     </p>
                   </div>
                   <button
                     onClick={simulateByeRound}
                     disabled={isSimulatingSeason}
-                    className="w-full py-3 bg-zinc-800 border border-zinc-700 hover:bg-zinc-750 text-white font-bold text-xs rounded-xl transition-all mt-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full py-3 bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-xl transition-all mt-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                   >
                     {isSimulatingSeason ? "Mensimulasikan..." : "Simulasikan Pekan Ini"}
                   </button>
@@ -1390,34 +1455,34 @@ export default function GamePage() {
               )}
 
               {/* Show other round fixtures in a list */}
-              <div className="bg-zinc-900/20 border border-zinc-900 rounded-2xl overflow-hidden">
-                <div className="p-3 bg-zinc-900/40 border-b border-zinc-900 flex justify-between items-center">
-                  <span className="text-[10px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wider">
+              <div className="bg-white border-2 border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+                <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                  <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
                     Jadwal Pertandingan Lain Pekan Ini
                   </span>
                 </div>
 
-                <div className="p-4 space-y-3 divide-y divide-zinc-900/40 max-h-[200px] overflow-y-auto">
+                <div className="p-4 space-y-3 divide-y divide-slate-100 max-h-[200px] overflow-y-auto">
                   {fixtures[currentRoundIdx]?.map((fix, idx) => {
                     if (fix.home === userTeamName || fix.away === userTeamName) return null; // Skip user match
                     
                     return (
                       <div key={idx} className="flex justify-between items-center text-xs pt-3 first:pt-0">
-                        <span className="truncate max-w-[120px] font-semibold text-zinc-400 text-left w-1/3">
+                        <span className="truncate max-w-[120px] font-semibold text-slate-600 text-left w-1/3">
                           {fix.home}
                         </span>
                         <div className="text-center w-1/3 shrink-0">
                           {fix.simulated ? (
-                            <span className="bg-zinc-900 border border-zinc-850 px-2 py-0.5 rounded font-bold text-zinc-300 font-mono">
+                            <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-bold text-slate-700 font-mono">
                               {fix.homeScore} - {fix.awayScore}
                             </span>
                           ) : (
-                            <span className="text-[10px] font-bold text-zinc-600 bg-zinc-950 px-2 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
                               TBD
                             </span>
                           )}
                         </div>
-                        <span className="truncate max-w-[120px] font-semibold text-zinc-400 text-right w-1/3">
+                        <span className="truncate max-w-[120px] font-semibold text-slate-600 text-right w-1/3">
                           {fix.away}
                         </span>
                       </div>
@@ -1430,7 +1495,7 @@ export default function GamePage() {
               {fixtures[currentRoundIdx]?.every(f => f.simulated) && !isSimulatingSeason && (
                 <button
                   onClick={handleNextRound}
-                  className="w-full py-3.5 bg-white hover:bg-zinc-100 text-black font-extrabold uppercase text-xs rounded-xl active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow"
+                  className="w-full py-3.5 bg-blue-500 hover:bg-blue-600 text-white font-extrabold uppercase text-xs rounded-xl active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-blue-200"
                 >
                   Lanjutkan ke Pekan Berikutnya
                   <ArrowRight className="w-4 h-4" />
@@ -1440,31 +1505,31 @@ export default function GamePage() {
             </div>
 
             {/* ROADMAP TIMELINE */}
-            <div className="col-span-1 lg:col-span-12 mt-6 bg-zinc-900/40 border border-zinc-900 rounded-2xl p-5 relative overflow-hidden">
-              <div className="flex items-center justify-between mb-4">
+            <div className="col-span-1 lg:col-span-12 mt-6 bg-white border-2 border-slate-200 shadow-sm rounded-2xl p-6 relative overflow-hidden">
+              <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h3 className="font-bold text-white text-sm uppercase tracking-wider">
+                  <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider">
                     Roadmap Kompetisi Musim Ini
                   </h3>
-                  <p className="text-[10px] text-zinc-500 mt-0.5">
+                  <p className="text-[10px] sm:text-xs font-medium text-slate-500 mt-1">
                     Jalur perjalanan {userTeamName} dari pekan pertama hingga kualifikasi kompetisi Eropa
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-saweria/10 border border-saweria/20 rounded text-[10px] text-saweria font-bold">
-                  <Star className="w-3 h-3 fill-saweria" />
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-[10px] text-emerald-600 font-black tracking-wider uppercase">
+                  <Star className="w-3.5 h-3.5 fill-emerald-500 text-emerald-500" />
                   Pekan {currentRoundIdx + 1} Aktif
                 </div>
               </div>
               
-              <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-thin select-none">
+              <div className="flex gap-4 overflow-x-auto pb-4 pt-1 scrollbar-thin select-none">
                 {fixtures.map((round, rIdx) => {
                   const userFix = round.find(f => f.home === userTeamName || f.away === userTeamName) || null;
                   if (!userFix) {
                     return (
-                      <div key={rIdx} className="flex-shrink-0 w-36 bg-zinc-950/60 border border-zinc-900 p-3 rounded-xl flex flex-col justify-between">
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase">Pekan {rIdx + 1}</span>
-                        <span className="text-xs font-bold text-zinc-400 mt-2">Istirahat (BYE)</span>
-                        <span className="text-[8px] text-zinc-650 mt-1 italic">Tidak ada laga</span>
+                      <div key={rIdx} className="flex-shrink-0 w-40 bg-slate-50 border-2 border-dashed border-slate-200 p-4 rounded-2xl flex flex-col justify-between">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pekan {rIdx + 1}</span>
+                        <span className="text-sm font-black text-slate-600 mt-3">Istirahat (BYE)</span>
+                        <span className="text-[9px] font-semibold text-slate-400 mt-1.5 italic">Tidak ada laga</span>
                       </div>
                     );
                   }
@@ -1474,7 +1539,7 @@ export default function GamePage() {
                   const isCompleted = userFix.simulated;
                   const isActive = rIdx === currentRoundIdx;
                   
-                  let nodeBg = "bg-zinc-950/40 border-zinc-900 text-zinc-500";
+                  let nodeBg = "bg-white border-slate-200 text-slate-500 shadow-sm opacity-60";
                   let scoreText = "Belum Main";
                   let statusBadge = null;
                   
@@ -1484,34 +1549,34 @@ export default function GamePage() {
                     
                     scoreText = `${uScore} - ${oScore}`;
                     if (uScore > oScore) {
-                      nodeBg = "bg-emerald-950/20 border-emerald-900/60 text-emerald-400";
-                      statusBadge = <span className="text-[7px] font-black bg-emerald-500 text-black px-1.5 py-0.5 rounded-sm uppercase leading-none">MENANG</span>;
+                      nodeBg = "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm opacity-100";
+                      statusBadge = <span className="text-[8px] font-black bg-emerald-500 text-white px-2 py-0.5 rounded-md uppercase tracking-wider">MENANG</span>;
                     } else if (uScore === oScore) {
-                      nodeBg = "bg-yellow-950/20 border-yellow-900/60 text-yellow-300";
-                      statusBadge = <span className="text-[7px] font-black bg-yellow-500 text-black px-1.5 py-0.5 rounded-sm uppercase leading-none">SERI</span>;
+                      nodeBg = "bg-yellow-50 border-yellow-200 text-yellow-700 shadow-sm opacity-100";
+                      statusBadge = <span className="text-[8px] font-black bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-md uppercase tracking-wider">SERI</span>;
                     } else {
-                      nodeBg = "bg-rose-950/20 border-rose-900/60 text-rose-400";
-                      statusBadge = <span className="text-[7px] font-black bg-rose-500 text-white px-1.5 py-0.5 rounded-sm uppercase leading-none font-bold">KALAH</span>;
+                      nodeBg = "bg-rose-50 border-rose-200 text-rose-700 shadow-sm opacity-100";
+                      statusBadge = <span className="text-[8px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-md uppercase tracking-wider">KALAH</span>;
                     }
                   } else if (isActive) {
-                    nodeBg = "bg-zinc-950 border-saweria shadow-[0_0_12px_rgba(255,203,5,0.2)] text-white animate-pulse-glow";
+                    nodeBg = "bg-white border-emerald-400 shadow-md shadow-emerald-100 text-slate-800 scale-105 transform z-10 opacity-100";
                     scoreText = "VS";
                   }
                   
                   return (
                     <div 
                       key={rIdx} 
-                      className={`flex-shrink-0 w-36 border p-3 rounded-xl flex flex-col justify-between transition-all duration-300 relative ${nodeBg}`}
+                      className={`flex-shrink-0 w-40 border-2 p-4 rounded-2xl flex flex-col justify-between transition-all duration-300 relative ${nodeBg}`}
                     >
                       <div className="flex justify-between items-center w-full">
-                        <span className="text-[9px] font-black uppercase tracking-wider">
+                        <span className="text-[10px] font-black uppercase tracking-wider">
                           Pekan {rIdx + 1}
                         </span>
                         {statusBadge}
                       </div>
                       
-                      <div className="mt-3.5 flex flex-col">
-                        <span className="text-[10px] text-zinc-400 font-bold uppercase truncate max-w-full">
+                      <div className="mt-4 flex flex-col">
+                        <span className="text-[11px] text-slate-500 font-bold uppercase truncate max-w-full">
                           vs {oppName}
                         </span>
                         <span className="text-sm font-black mt-1 font-mono tracking-tight">
@@ -1524,32 +1589,32 @@ export default function GamePage() {
                 
                 {/* FINAL GATE: Champions League / Europa League Gate */}
                 <div 
-                  className={`flex-shrink-0 w-44 border p-3 rounded-xl flex flex-col justify-between transition-all duration-350 relative overflow-hidden ${
+                  className={`flex-shrink-0 w-48 border-2 p-4 rounded-2xl flex flex-col justify-between transition-all duration-350 relative overflow-hidden ${
                     currentRoundIdx >= fixtures.length - 1 && fixtures.every(r => r.every(f => f.simulated))
-                      ? "bg-saweria/10 border-saweria text-saweria shadow-[0_0_15px_rgba(255,203,5,0.25)] animate-pulse" 
-                      : "bg-zinc-950/40 border-zinc-900/60 text-zinc-650"
+                      ? "bg-yellow-50 border-yellow-400 text-yellow-600 shadow-md shadow-yellow-100 animate-pulse" 
+                      : "bg-white border-slate-200 border-dashed text-slate-400 opacity-60"
                   }`}
                 >
                   <div className="flex justify-between items-center w-full">
-                    <span className="text-[9px] font-black uppercase tracking-wider">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-700">
                       Kompetisi Eropa
                     </span>
-                    <Trophy className="w-3.5 h-3.5 text-saweria" />
+                    <Trophy className="w-4 h-4 text-yellow-500" />
                   </div>
                   
-                  <div className="mt-3.5 flex flex-col">
-                    <span className="text-[10px] font-bold uppercase truncate text-zinc-400">
+                  <div className="mt-4 flex flex-col">
+                    <span className="text-[11px] font-bold uppercase truncate text-slate-400">
                       Kelolosan Skuad
                     </span>
-                    <div className="flex items-center gap-1 mt-1">
+                    <div className="flex items-center gap-1 mt-1.5">
                       {currentRoundIdx >= fixtures.length - 1 && fixtures.every(r => r.every(f => f.simulated)) ? (
-                        <span className="text-xs font-black uppercase tracking-wide text-saweria">
+                        <span className="text-xs font-black uppercase tracking-wide text-yellow-600">
                           DITENTUKAN!
                         </span>
                       ) : (
                         <>
-                          <Lock className="w-3 h-3 text-zinc-600 shrink-0" />
-                          <span className="text-xs font-black uppercase tracking-wide text-zinc-600">
+                          <Lock className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span className="text-xs font-black uppercase tracking-wide text-slate-400">
                             TERKUNCI
                           </span>
                         </>
@@ -1598,32 +1663,31 @@ export default function GamePage() {
                   {/* Hologram Banner */}
                   {tournamentType === 'champions' ? (
                     isUserChampion ? (
-                      <div className="w-full max-w-2xl bg-gradient-to-b from-blue-950 via-zinc-950 to-zinc-950 border-2 border-yellow-450 p-8 rounded-3xl relative overflow-hidden animate-holo-cl animate-scale-up shadow-[0_0_40px_rgba(255,203,5,0.25)] text-center">
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-yellow-400/5 rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute -inset-x-20 top-0 h-[2px] bg-gradient-to-r from-transparent via-yellow-450 to-transparent animate-pulse" />
+                      <div className="w-full max-w-2xl bg-white border-4 border-yellow-400 p-10 rounded-[2rem] relative overflow-hidden animate-holo-cl animate-scale-up shadow-[0_20px_60px_rgba(250,204,21,0.2)] text-center">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-100 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl pointer-events-none" />
                         
-                        <Trophy className="w-20 h-20 text-yellow-400 mx-auto animate-bounce mb-4 drop-shadow-[0_0_20px_rgba(250,204,21,0.6)]" />
-                        <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-widest text-white leading-none">
+                        <Trophy className="w-24 h-24 text-yellow-400 mx-auto animate-bounce mb-6 drop-shadow-md" />
+                        <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-800 leading-none">
                           JUARA CHAMPIONS LEAGUE!
                         </h2>
-                        <p className="text-xs text-yellow-450 font-extrabold uppercase tracking-widest mt-1.5 font-mono">
+                        <p className="text-sm text-yellow-600 font-extrabold uppercase tracking-widest mt-3 font-mono">
                           THE CHAMPIONS OF EUROPE
                         </p>
-                        <p className="text-zinc-400 text-xs sm:text-sm mt-4 max-w-md mx-auto leading-relaxed">
+                        <p className="text-slate-500 text-sm sm:text-base mt-6 max-w-lg mx-auto leading-relaxed font-medium">
                           Luar biasa! <b>{userTeamName}</b> berhasil mengalahkan raksasa-raksasa Eropa dan menjuarai UEFA Champions League! Anda adalah Raja Eropa yang sesungguhnya!
                         </p>
                       </div>
                     ) : (
-                      <div className="w-full max-w-2xl bg-gradient-to-b from-blue-950 via-zinc-950 to-zinc-950 border border-blue-900 p-8 rounded-3xl relative overflow-hidden animate-scale-up text-center shadow-lg">
-                        <ShieldAlert className="w-16 h-16 text-blue-400 mx-auto mb-4 animate-pulse" />
-                        <h2 className="text-2xl font-black uppercase tracking-widest text-zinc-300 leading-none">
+                      <div className="w-full max-w-2xl bg-white border-2 border-slate-200 p-10 rounded-[2rem] relative overflow-hidden animate-scale-up text-center shadow-lg">
+                        <ShieldAlert className="w-20 h-20 text-slate-300 mx-auto mb-6 animate-pulse" />
+                        <h2 className="text-3xl font-black uppercase tracking-tight text-slate-700 leading-none">
                           KAMPANYE EROPA SELESAI
                         </h2>
-                        <p className="text-xs text-zinc-500 font-extrabold uppercase tracking-widest mt-1.5 font-mono">
+                        <p className="text-sm text-slate-500 font-extrabold uppercase tracking-widest mt-3 font-mono">
                           Tim Anda Finis Peringkat Ke-{userPos}
                         </p>
-                        <p className="text-zinc-400 text-xs sm:text-sm mt-4 max-w-md mx-auto leading-relaxed">
+                        <p className="text-slate-500 text-sm sm:text-base mt-6 max-w-lg mx-auto leading-relaxed font-medium">
                           Tim Anda menyelesaikan turnamen UEFA Champions League di peringkat ke-<b>{userPos}</b>. Kancah Eropa sangat ketat, ayo persiapkan taktik yang lebih matang musim depan!
                         </p>
                       </div>
@@ -1631,55 +1695,55 @@ export default function GamePage() {
                   ) : (
                     // Domestic League Banners
                     isUserChampion ? (
-                      <div className="w-full max-w-2xl bg-gradient-to-b from-emerald-950/40 via-zinc-950 to-zinc-950 border-2 border-saweria p-8 rounded-3xl relative overflow-hidden animate-scale-up shadow-[0_0_40px_rgba(255,203,5,0.2)] text-center">
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-saweria/5 rounded-full blur-3xl pointer-events-none" />
-                        <Trophy className="w-20 h-20 text-saweria mx-auto animate-bounce mb-4 drop-shadow-[0_0_20px_rgba(255,203,5,0.4)]" />
-                        <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-widest text-white leading-none">
+                      <div className="w-full max-w-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border-4 border-emerald-400 p-10 rounded-[2rem] relative overflow-hidden animate-scale-up shadow-xl text-center">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-200/50 rounded-full blur-3xl pointer-events-none" />
+                        <Trophy className="w-24 h-24 text-emerald-500 mx-auto animate-bounce mb-6 drop-shadow-md" />
+                        <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-800 leading-none">
                           TIM ANDA JUARA LIGA!
                         </h2>
-                        <p className="text-xs text-saweria font-extrabold uppercase tracking-widest mt-1.5 font-mono">
+                        <p className="text-sm text-emerald-600 font-extrabold uppercase tracking-widest mt-3 font-mono">
                           Domestic League Champion • Lolos Liga Champions
                         </p>
-                        <p className="text-zinc-400 text-xs sm:text-sm mt-4 max-w-md mx-auto leading-relaxed">
+                        <p className="text-slate-600 text-sm sm:text-base mt-6 max-w-lg mx-auto leading-relaxed font-medium">
                           Selamat atas pencapaian gemilang ini! <b>{userTeamName}</b> berhasil merajai klasemen liga domestik dan lolos otomatis ke UEFA Champions League musim depan!
                         </p>
                       </div>
                     ) : isUserQualifiedCL ? (
-                      <div className="w-full max-w-2xl bg-gradient-to-b from-blue-950/30 via-zinc-950 to-zinc-950 border-2 border-blue-500/50 p-8 rounded-3xl relative overflow-hidden animate-holo-cl animate-scale-up shadow-[0_0_30px_rgba(59,130,246,0.15)] text-center">
-                        <Trophy className="w-18 h-18 text-blue-400 mx-auto mb-4 animate-pulse" />
-                        <h2 className="text-3xl font-black uppercase tracking-widest text-white leading-none">
+                      <div className="w-full max-w-2xl bg-gradient-to-br from-blue-50 to-sky-50 border-4 border-blue-400 p-10 rounded-[2rem] relative overflow-hidden animate-holo-cl animate-scale-up shadow-xl text-center">
+                        <Trophy className="w-20 h-20 text-blue-500 mx-auto mb-6 animate-pulse drop-shadow-md" />
+                        <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-800 leading-none">
                           LOLOS LIGA CHAMPIONS!
                         </h2>
-                        <p className="text-xs text-blue-300 font-extrabold uppercase tracking-widest mt-1.5 font-mono">
+                        <p className="text-sm text-blue-600 font-extrabold uppercase tracking-widest mt-3 font-mono">
                           Runner-Up Liga • Lolos Liga Champions
                         </p>
-                        <p className="text-zinc-400 text-xs sm:text-sm mt-4 max-w-md mx-auto leading-relaxed">
+                        <p className="text-slate-600 text-sm sm:text-base mt-6 max-w-lg mx-auto leading-relaxed font-medium">
                           Kerja keras terbayar! <b>{userTeamName}</b> finis di peringkat ke-<b>2</b> klasemen akhir liga domestik dan berhak melaju ke UEFA Champions League musim depan!
                         </p>
                       </div>
                     ) : userPos <= 4 ? (
-                      <div className="w-full max-w-2xl bg-gradient-to-b from-sky-950/20 via-zinc-950 to-zinc-950 border-2 border-sky-500/50 p-8 rounded-3xl relative overflow-hidden animate-scale-up text-center shadow-lg">
-                        <Star className="w-16 h-16 text-sky-400 mx-auto mb-4 animate-pulse" />
-                        <h2 className="text-2xl font-black uppercase tracking-widest text-white leading-none">
+                      <div className="w-full max-w-2xl bg-white border-2 border-slate-200 p-10 rounded-[2rem] relative overflow-hidden animate-scale-up text-center shadow-lg">
+                        <Star className="w-20 h-20 text-sky-400 mx-auto mb-6 animate-pulse" />
+                        <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-slate-800 leading-none">
                           LOLOS PIALA EROPA (UEL)
                         </h2>
-                        <p className="text-xs text-sky-300 font-extrabold uppercase tracking-widest mt-1.5 font-mono">
+                        <p className="text-sm text-sky-500 font-extrabold uppercase tracking-widest mt-3 font-mono">
                           Europa League Qualification (Peringkat {userPos})
                         </p>
-                        <p className="text-zinc-400 text-xs sm:text-sm mt-4 max-w-md mx-auto leading-relaxed">
+                        <p className="text-slate-600 text-sm sm:text-base mt-6 max-w-lg mx-auto leading-relaxed font-medium">
                           Tim Anda finis di peringkat ke-<b>{userPos}</b>. Meskipun tidak lolos ke Champions League (hanya peringkat 1-2), Anda berhasil mengamankan tiket kualifikasi UEFA Europa League!
                         </p>
                       </div>
                     ) : (
-                      <div className="w-full max-w-2xl bg-gradient-to-b from-zinc-900 to-zinc-950 border-2 border-zinc-800 p-8 rounded-3xl relative overflow-hidden animate-scale-up text-center shadow-lg">
-                        <ShieldAlert className="w-16 h-16 text-zinc-500 mx-auto mb-4" />
-                        <h2 className="text-2xl font-black uppercase tracking-widest text-zinc-300 leading-none">
+                      <div className="w-full max-w-2xl bg-white border-2 border-slate-200 p-10 rounded-[2rem] relative overflow-hidden animate-scale-up text-center shadow-lg">
+                        <ShieldAlert className="w-20 h-20 text-slate-300 mx-auto mb-6" />
+                        <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-slate-700 leading-none">
                           TETAP DI LIGA DOMESTIK
                         </h2>
-                        <p className="text-xs text-zinc-500 font-extrabold uppercase tracking-widest mt-1.5 font-mono">
+                        <p className="text-sm text-slate-500 font-extrabold uppercase tracking-widest mt-3 font-mono">
                           Tidak Lolos Kualifikasi Eropa (Peringkat {userPos})
                         </p>
-                        <p className="text-zinc-400 text-xs sm:text-sm mt-4 max-w-md mx-auto leading-relaxed">
+                        <p className="text-slate-500 text-sm sm:text-base mt-6 max-w-lg mx-auto leading-relaxed font-medium">
                           Musim berakhir kurang memuaskan karena tim finis di peringkat ke-<b>{userPos}</b>. Anda harus merombak taktik dan melakukan gacha baru musim depan!
                         </p>
                       </div>
@@ -1691,53 +1755,53 @@ export default function GamePage() {
                     
                     {/* Final Standings Column */}
                     <div className="flex flex-col gap-3">
-                      <h3 className="font-bold text-zinc-400 text-xs uppercase tracking-wider text-left flex items-center gap-1.5">
-                        <Trophy className="w-4 h-4 text-saweria" />
+                      <h3 className="font-bold text-slate-600 text-xs uppercase tracking-wider text-left flex items-center gap-1.5">
+                        <Trophy className="w-4 h-4 text-yellow-500" />
                         Klasemen Akhir Turnamen
                       </h3>
-                      <div className={`w-full border rounded-2xl overflow-hidden ${
-                        tournamentType === 'champions' ? "border-blue-900/60" : "border-zinc-900"
+                      <div className={`w-full border-2 rounded-2xl overflow-hidden ${
+                        tournamentType === 'champions' ? "border-blue-200" : "border-slate-200"
                       }`}>
                         <table className="w-full text-left text-xs border-collapse">
                           <thead>
-                            <tr className={`border-b text-zinc-500 font-bold uppercase tracking-wider text-[9px] ${
-                              tournamentType === 'champions' ? "bg-blue-950/20 border-blue-900/40" : "bg-zinc-900/60 border-zinc-900"
+                            <tr className={`border-b text-slate-500 font-bold uppercase tracking-wider text-[10px] ${
+                              tournamentType === 'champions' ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"
                             }`}>
-                              <th className="py-2.5 px-3 text-center w-8">#</th>
-                              <th className="py-2.5 px-3">Klub</th>
-                              <th className="py-2.5 px-2 text-center">P</th>
-                              <th className="py-2.5 px-2 text-center">GD</th>
-                              <th className="py-2.5 px-3 text-center">PTS</th>
+                              <th className="py-3 px-4 text-center w-8">#</th>
+                              <th className="py-3 px-4">Klub</th>
+                              <th className="py-3 px-2 text-center">P</th>
+                              <th className="py-3 px-2 text-center">GD</th>
+                              <th className="py-3 px-4 text-center">PTS</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-zinc-900/40 bg-zinc-950/20">
+                          <tbody className="divide-y divide-slate-100 bg-white">
                             {sorted.map((team, idx) => {
                               const pos = idx + 1;
                               let rowBg = "";
-                              let posColor = "text-zinc-550";
+                              let posColor = "text-slate-400";
                               
                               if (team.isUser) {
-                                rowBg = "bg-saweria/10 font-bold text-saweria";
-                                posColor = "text-saweria";
+                                rowBg = "bg-emerald-50 font-bold text-emerald-800";
+                                posColor = "text-emerald-600";
                               } else {
                                 if (tournamentType === 'champions') {
-                                  if (pos === 1) posColor = "text-yellow-400 font-bold";
-                                  else if (pos <= 4) posColor = "text-blue-405";
+                                  if (pos === 1) posColor = "text-yellow-500 font-black";
+                                  else if (pos <= 4) posColor = "text-blue-500 font-bold";
                                 } else {
-                                  if (pos <= 2) posColor = "text-yellow-400 font-bold";
-                                  else if (pos <= 4) posColor = "text-sky-400";
+                                  if (pos <= 2) posColor = "text-yellow-500 font-black";
+                                  else if (pos <= 4) posColor = "text-sky-500 font-bold";
                                 }
                               }
                               
                               return (
-                                <tr key={team.name} className={`${rowBg} hover:bg-zinc-900/20 transition-colors`}>
-                                  <td className={`py-2.5 px-3 text-center font-bold ${posColor}`}>{pos}</td>
-                                  <td className="py-2.5 px-3 truncate max-w-[140px] font-semibold text-zinc-300">{team.name}</td>
-                                  <td className="py-2.5 px-2 text-center text-zinc-400">{team.played}</td>
-                                  <td className={`py-2.5 px-2 text-center font-bold ${team.goalDifference > 0 ? "text-emerald-450" : team.goalDifference < 0 ? "text-rose-450" : "text-zinc-550"}`}>
+                                <tr key={team.name} className={`${rowBg} hover:bg-slate-50 transition-colors`}>
+                                  <td className={`py-3 px-4 text-center font-bold ${posColor}`}>{pos}</td>
+                                  <td className={`py-3 px-4 truncate max-w-[140px] font-semibold ${team.isUser ? 'text-emerald-800' : 'text-slate-700'}`}>{team.name}</td>
+                                  <td className="py-3 px-2 text-center text-slate-500">{team.played}</td>
+                                  <td className={`py-3 px-2 text-center font-bold ${team.goalDifference > 0 ? "text-emerald-500" : team.goalDifference < 0 ? "text-rose-500" : "text-slate-400"}`}>
                                     {team.goalDifference > 0 ? `+${team.goalDifference}` : team.goalDifference}
                                   </td>
-                                  <td className="py-2.5 px-3 text-center font-black text-white">{team.points}</td>
+                                  <td className="py-3 px-4 text-center font-black text-slate-800">{team.points}</td>
                                 </tr>
                               );
                             })}
@@ -1771,13 +1835,13 @@ export default function GamePage() {
 
                     {/* Match History Stepper Column */}
                     <div className="flex flex-col gap-3">
-                      <h3 className="font-bold text-zinc-400 text-xs uppercase tracking-wider text-left flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4 text-saweria" />
+                      <h3 className="font-bold text-slate-600 text-xs uppercase tracking-wider text-left flex items-center gap-1.5">
+                        <Calendar className="w-4 h-4 text-emerald-500" />
                         Recap Perjalanan Musim
                       </h3>
                       
-                      <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-4 max-h-[360px] overflow-y-auto scrollbar-thin">
-                        <div className="space-y-4 relative border-l border-zinc-800 ml-2 pl-4 text-left">
+                      <div className="bg-white border-2 border-slate-200 rounded-2xl p-5 max-h-[360px] overflow-y-auto scrollbar-thin shadow-sm">
+                        <div className="space-y-4 relative border-l-2 border-slate-100 ml-2 pl-5 text-left">
                           {fixtures.map((round, rIdx) => {
                             const userFix = round.find(f => f.home === userTeamName || f.away === userTeamName) || null;
                             if (!userFix) return null;
@@ -1787,30 +1851,33 @@ export default function GamePage() {
                             const uScore = isUserHome ? (userFix.homeScore ?? 0) : (userFix.awayScore ?? 0);
                             const oScore = isUserHome ? (userFix.awayScore ?? 0) : (userFix.homeScore ?? 0);
                             
-                            let outcomeColor = "bg-zinc-500";
+                            let outcomeColor = "bg-slate-200 text-slate-500";
                             let outcomeText = "S";
+                            let cardColor = "border-slate-200 hover:border-slate-300";
                             
                             if (uScore > oScore) {
-                              outcomeColor = "bg-emerald-500 text-black";
+                              outcomeColor = "bg-emerald-500 text-white";
                               outcomeText = "M";
+                              cardColor = "border-emerald-200 bg-emerald-50 hover:border-emerald-300";
                             } else if (uScore < oScore) {
                               outcomeColor = "bg-rose-500 text-white font-bold";
                               outcomeText = "K";
+                              cardColor = "border-rose-200 bg-rose-50 hover:border-rose-300";
                             }
 
                             return (
                               <div key={rIdx} className="relative group">
                                 {/* Bullet indicator on the line */}
-                                <div className={`absolute -left-[22px] top-1 w-3.5 h-3.5 rounded-full border border-zinc-950 flex items-center justify-center text-[7px] font-black ${outcomeColor}`}>
+                                <div className={`absolute -left-[27px] top-1.5 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-black shadow-sm ${outcomeColor}`}>
                                   {outcomeText}
                                 </div>
                                 
-                                <div className="flex justify-between items-center bg-zinc-950/30 border border-zinc-900/50 p-2.5 rounded-xl hover:border-zinc-800 transition-colors">
+                                <div className={`flex justify-between items-center bg-white border-2 p-3 rounded-xl transition-colors shadow-sm ${cardColor}`}>
                                   <div className="flex flex-col">
-                                    <span className="text-[9px] font-bold text-zinc-500 uppercase">Pekan {rIdx + 1}</span>
-                                    <span className="text-[11px] text-white font-black uppercase mt-0.5">vs {oppName}</span>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase">Pekan {rIdx + 1}</span>
+                                    <span className="text-xs text-slate-800 font-black uppercase mt-0.5">vs {oppName}</span>
                                   </div>
-                                  <div className="text-xs font-black font-mono bg-zinc-950 border border-zinc-850 px-2.5 py-1 rounded text-zinc-300">
+                                  <div className="text-xs font-black font-mono bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-slate-700 shadow-sm">
                                     {uScore} - {oScore}
                                   </div>
                                 </div>
@@ -1825,36 +1892,36 @@ export default function GamePage() {
 
                   {/* Play Again / Next Tournament Selection */}
                   {tournamentType === 'domestic' && isUserQualifiedCL ? (
-                    <div className="w-full mt-6 flex flex-col gap-6 items-center">
+                    <div className="w-full mt-10 flex flex-col gap-6 items-center">
                       <div className="text-center">
-                        <h3 className="text-lg font-black uppercase tracking-wider text-saweria animate-pulse">
+                        <h3 className="text-xl font-black uppercase tracking-wider text-emerald-500 animate-pulse">
                           APA LANGKAH ANDA SELANJUTNYA?
                         </h3>
-                        <p className="text-zinc-500 text-xs mt-1 max-w-md mx-auto">
+                        <p className="text-slate-500 font-medium text-sm mt-2 max-w-lg mx-auto">
                           Anda berhak melaju ke UEFA Champions League atau tetap bersaing di liga domestik saat ini.
                         </p>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mt-2 text-left">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mt-4 text-left">
                         {/* Choice 1: Champions League */}
-                        <div className="bg-gradient-to-b from-blue-950/60 to-zinc-950 border border-blue-900/50 p-6 rounded-2xl flex flex-col justify-between items-center text-center shadow-lg shadow-blue-950/15">
-                          <Trophy className="w-12 h-12 text-blue-400 animate-pulse mb-3" />
-                          <h4 className="text-sm font-black uppercase text-white tracking-wider">
+                        <div className="bg-white border-4 border-blue-100 p-8 rounded-[2rem] flex flex-col justify-between items-center text-center shadow-xl hover:shadow-blue-200 transition-all hover:-translate-y-1">
+                          <Trophy className="w-16 h-16 text-blue-500 animate-pulse mb-4 drop-shadow-md" />
+                          <h4 className="text-lg font-black uppercase text-slate-800 tracking-wider">
                             UEFA Champions League
                           </h4>
-                          <p className="text-zinc-400 text-[11px] leading-relaxed mt-2 h-12">
+                          <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed mt-3 h-16">
                             Hadapi klub-klub elite terkuat dari seluruh Eropa (Real Madrid, Man City, Milan, dll) untuk memperebutkan trofi Si Kuping Lebar!
                           </p>
-                          <div className="flex flex-col gap-2 w-full mt-4">
+                          <div className="flex flex-col gap-3 w-full mt-6">
                             <button
                               onClick={() => handleGoToChampionsLeague(true)}
-                              className="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs uppercase rounded-xl transition-all cursor-pointer"
+                              className="w-full py-3.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs uppercase rounded-xl transition-all cursor-pointer shadow-md shadow-blue-200"
                             >
                               Mainkan CL (Simpan Skuad)
                             </button>
                             <button
                               onClick={() => handleGoToChampionsLeague(false)}
-                              className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 text-zinc-300 font-semibold text-xs uppercase rounded-xl transition-all cursor-pointer"
+                              className="w-full py-3 bg-white hover:bg-blue-50 border-2 border-blue-200 text-blue-600 font-bold text-xs uppercase rounded-xl transition-all cursor-pointer"
                             >
                               Mainkan CL (Draft Ulang)
                             </button>
@@ -1862,24 +1929,24 @@ export default function GamePage() {
                         </div>
 
                         {/* Choice 2: Stay Domestic */}
-                        <div className="bg-gradient-to-b from-zinc-900/40 to-zinc-950 border border-zinc-850 p-6 rounded-2xl flex flex-col justify-between items-center text-center shadow-lg">
-                          <RotateCcw className="w-12 h-12 text-saweria mb-3" />
-                          <h4 className="text-sm font-black uppercase text-white tracking-wider">
+                        <div className="bg-white border-4 border-slate-100 p-8 rounded-[2rem] flex flex-col justify-between items-center text-center shadow-xl hover:shadow-slate-200 transition-all hover:-translate-y-1">
+                          <RotateCcw className="w-16 h-16 text-emerald-500 mb-4 drop-shadow-md" />
+                          <h4 className="text-lg font-black uppercase text-slate-800 tracking-wider">
                             Tetap di Liga Domestik
                           </h4>
-                          <p className="text-zinc-400 text-[11px] leading-relaxed mt-2 h-12">
+                          <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed mt-3 h-16">
                             Tetap berada di liga lokal saat ini untuk mempertahankan kejuaraan atau membalas dendam dengan dominasi mutlak.
                           </p>
-                          <div className="flex flex-col gap-2 w-full mt-4">
+                          <div className="flex flex-col gap-3 w-full mt-6">
                             <button
                               onClick={() => handleRestartDomesticLeague(true)}
-                              className="w-full py-2.5 bg-saweria hover:bg-saweria-light text-black font-extrabold text-xs uppercase rounded-xl transition-all cursor-pointer"
+                              className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs uppercase rounded-xl transition-all cursor-pointer shadow-md shadow-emerald-200"
                             >
                               Mulai Lagi (Simpan Skuad)
                             </button>
                             <button
                               onClick={() => handleRestartDomesticLeague(false)}
-                              className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 text-zinc-300 font-semibold text-xs uppercase rounded-xl transition-all cursor-pointer"
+                              className="w-full py-3 bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-500 font-bold text-xs uppercase rounded-xl transition-all cursor-pointer"
                             >
                               Mulai Lagi (Draft Ulang)
                             </button>
@@ -1889,29 +1956,29 @@ export default function GamePage() {
                     </div>
                   ) : (
                     /* Default Try Again / Reset Control */
-                    <div className="mt-6 w-full flex flex-col items-center gap-3">
+                    <div className="mt-8 w-full flex flex-col items-center gap-4">
                       {tournamentType === 'champions' ? (
                         <button
                           onClick={handleResetGame}
-                          className="w-full max-w-xs py-3.5 bg-blue-500 hover:bg-blue-600 text-white font-black uppercase text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-xl shadow-blue-950/15 cursor-pointer"
+                          className="w-full max-w-sm py-4 bg-blue-500 hover:bg-blue-600 text-white font-black uppercase text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-xl shadow-blue-200 cursor-pointer hover:-translate-y-1"
                         >
-                          <RotateCcw className="w-4 h-4" />
+                          <RotateCcw className="w-5 h-5" />
                           Mulai Game Baru (Reset Total)
                         </button>
                       ) : (
-                        <div className="flex flex-col gap-3 w-full max-w-md items-center">
+                        <div className="flex flex-col gap-4 w-full max-w-md items-center">
                           <button
                             onClick={() => handleRestartDomesticLeague(true)}
-                            className="w-full max-w-xs py-3 bg-saweria text-black font-black uppercase text-xs sm:text-sm rounded-xl hover:bg-saweria-light transition-all flex items-center justify-center gap-2 shadow-lg shadow-saweria/10 cursor-pointer"
+                            className="w-full max-w-sm py-4 bg-emerald-500 text-white font-black uppercase text-sm rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-xl shadow-emerald-200 cursor-pointer hover:-translate-y-1"
                           >
-                            <RotateCcw className="w-4 h-4" />
+                            <RotateCcw className="w-5 h-5" />
                             Main Lagi (Simpan Skuad)
                           </button>
                           <button
                             onClick={() => handleRestartDomesticLeague(false)}
-                            className="w-full max-w-xs py-2.5 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white font-bold uppercase text-[10px] sm:text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-full max-w-sm py-3.5 bg-white border-2 border-slate-200 text-slate-500 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 font-bold uppercase text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
                           >
-                            <RotateCcw className="w-3.5 h-3.5" />
+                            <RotateCcw className="w-4 h-4" />
                             Main Lagi (Draft Skuad Baru)
                           </button>
                         </div>
@@ -1923,13 +1990,15 @@ export default function GamePage() {
             })()}
           </div>
         )}
-        </>
+              </>
+            )}
+          </>
         )}
 
       </main>
 
       {/* Footer banner */}
-      <footer className="w-full border-t border-zinc-900 p-4 text-center text-[10px] text-zinc-600 mt-auto bg-zinc-950 px-6">
+      <footer className="w-full border-t border-slate-200 p-6 text-center text-[10px] sm:text-xs text-slate-400 font-medium mt-auto bg-white">
         &copy; 2026 Webscore Simulator. Dibuat menggunakan Next.js + Tailwind CSS.
       </footer>
     </div>

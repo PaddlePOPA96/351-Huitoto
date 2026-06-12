@@ -78,10 +78,10 @@ export default function PlayerAttributeModal({
   ];
 
   const getAttributeBadgeColor = (val: number) => {
-    if (val >= 80) return "text-emerald-400 bg-emerald-950/40 border-emerald-800/40 font-black";
-    if (val >= 70) return "text-green-300 bg-green-950/20 border-green-900/30 font-bold";
-    if (val >= 50) return "text-yellow-300 bg-yellow-950/20 border-yellow-900/30";
-    return "text-zinc-500 bg-zinc-900/40 border-zinc-800/40";
+    if (val >= 80) return "text-emerald-700 bg-emerald-100 border-emerald-300 font-black";
+    if (val >= 70) return "text-green-700 bg-green-100 border-green-300 font-bold";
+    if (val >= 50) return "text-yellow-700 bg-yellow-100 border-yellow-300";
+    return "text-slate-600 bg-slate-100 border-slate-200";
   };
 
   const getAttrVal = (name: string) => {
@@ -91,16 +91,16 @@ export default function PlayerAttributeModal({
   const pRating = normalizeRating(player.rat);
 
   return (
-    <div className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-50 animate-fade-in backdrop-blur-md">
-      <div className="bg-zinc-950 border border-zinc-850 rounded-3xl w-full max-w-4xl p-6 flex flex-col shadow-2xl relative max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center p-4 z-50 animate-fade-in backdrop-blur-sm">
+      <div className="bg-white border-2 border-slate-200 rounded-[2rem] w-full max-w-4xl p-8 flex flex-col shadow-2xl relative max-h-[92vh] overflow-y-auto">
         
         {/* Glow effect background */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-32 bg-saweria/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 bg-blue-50 rounded-full blur-3xl pointer-events-none" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-6 border-b border-zinc-900 z-10 relative">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full overflow-hidden bg-black/40 border border-zinc-800 flex items-center justify-center shadow-inner relative">
+        <div className="flex items-center justify-between pb-6 border-b-2 border-slate-100 z-10 relative">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-slate-200 flex items-center justify-center shadow-sm relative">
               {player.img_url && player.img_url.includes("default") === false ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -112,22 +112,22 @@ export default function PlayerAttributeModal({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <HelpCircle className="w-7 h-7 text-zinc-700" />
+                <HelpCircle className="w-8 h-8 text-slate-300" />
               )}
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-black text-white text-lg sm:text-xl uppercase tracking-wider">
+              <div className="flex items-center gap-3">
+                <h3 className="font-black text-slate-800 text-xl sm:text-2xl uppercase tracking-wider">
                   {player.name}
                 </h3>
-                <span className="text-[10px] font-mono font-black text-zinc-950 bg-saweria px-2 py-0.5 rounded-full">
+                <span className="text-xs font-mono font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
                   OVR {pRating}
                 </span>
               </div>
-              <p className="text-zinc-400 text-xs mt-1">
+              <p className="text-slate-500 text-sm mt-1 font-medium">
                 {player.club} • {player.nationality} • {player.age ? `${player.age} tahun` : "Umur N/A"}
               </p>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5 font-mono">
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1 font-mono">
                 {player.position} ({player.role})
               </p>
             </div>
@@ -135,28 +135,28 @@ export default function PlayerAttributeModal({
 
           <button 
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-zinc-900 hover:bg-zinc-850 text-zinc-400 hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer border border-zinc-800"
+            className="w-10 h-10 rounded-full bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 flex items-center justify-center transition-all duration-200 cursor-pointer border-2 border-slate-200 hover:border-rose-200 shadow-sm"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Attributes Columns Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 z-10 relative text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 z-10 relative text-sm">
           
           {/* TECHNICAL or GOALKEEPING Column */}
-          <div className="flex flex-col bg-zinc-950/40 p-4 border border-zinc-900 rounded-2xl">
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-900 text-zinc-400 font-bold uppercase tracking-wider text-[10px]">
-              <Shield className="w-3.5 h-3.5 text-saweria" />
+          <div className="flex flex-col bg-slate-50 p-5 border-2 border-slate-100 rounded-2xl">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-slate-200 text-slate-500 font-black uppercase tracking-wider text-[11px]">
+              <Shield className="w-4 h-4 text-emerald-500" />
               <span>{isGK ? "Goalkeeping" : "Technical"}</span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {(isGK ? gkAttrs : technicalAttrs).map((attr, idx) => {
                 const val = getAttrVal(attr.name);
                 return (
-                  <div key={idx} className="flex justify-between items-center py-0.5">
-                    <span className="text-zinc-400 font-medium">{attr.label}</span>
-                    <span className={`w-8 text-center font-mono py-0.5 rounded text-[10px] border ${getAttributeBadgeColor(val)}`}>
+                  <div key={idx} className="flex justify-between items-center">
+                    <span className="text-slate-600 font-bold text-xs">{attr.label}</span>
+                    <span className={`w-9 text-center font-mono py-1 rounded-md text-xs border-2 shadow-sm ${getAttributeBadgeColor(val)}`}>
                       {val}
                     </span>
                   </div>
@@ -166,18 +166,18 @@ export default function PlayerAttributeModal({
           </div>
 
           {/* MENTAL Column */}
-          <div className="flex flex-col bg-zinc-950/40 p-4 border border-zinc-900 rounded-2xl">
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-900 text-zinc-400 font-bold uppercase tracking-wider text-[10px]">
-              <Brain className="w-3.5 h-3.5 text-saweria" />
+          <div className="flex flex-col bg-slate-50 p-5 border-2 border-slate-100 rounded-2xl">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-slate-200 text-slate-500 font-black uppercase tracking-wider text-[11px]">
+              <Brain className="w-4 h-4 text-emerald-500" />
               <span>Mental</span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {mentalAttrs.map((attr, idx) => {
                 const val = getAttrVal(attr.name);
                 return (
-                  <div key={idx} className="flex justify-between items-center py-0.5">
-                    <span className="text-zinc-400 font-medium">{attr.label}</span>
-                    <span className={`w-8 text-center font-mono py-0.5 rounded text-[10px] border ${getAttributeBadgeColor(val)}`}>
+                  <div key={idx} className="flex justify-between items-center">
+                    <span className="text-slate-600 font-bold text-xs">{attr.label}</span>
+                    <span className={`w-9 text-center font-mono py-1 rounded-md text-xs border-2 shadow-sm ${getAttributeBadgeColor(val)}`}>
                       {val}
                     </span>
                   </div>
@@ -187,18 +187,18 @@ export default function PlayerAttributeModal({
           </div>
 
           {/* PHYSICAL Column (+ Outfield tech attributes for Goalkeepers) */}
-          <div className="flex flex-col bg-zinc-950/40 p-4 border border-zinc-900 rounded-2xl">
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-zinc-900 text-zinc-400 font-bold uppercase tracking-wider text-[10px]">
-              <Zap className="w-3.5 h-3.5 text-saweria" />
+          <div className="flex flex-col bg-slate-50 p-5 border-2 border-slate-100 rounded-2xl">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-slate-200 text-slate-500 font-black uppercase tracking-wider text-[11px]">
+              <Zap className="w-4 h-4 text-emerald-500" />
               <span>Physical & Fitness</span>
             </div>
-            <div className="space-y-2 mb-4">
+            <div className="space-y-2.5 mb-5">
               {physicalAttrs.map((attr, idx) => {
                 const val = getAttrVal(attr.name);
                 return (
-                  <div key={idx} className="flex justify-between items-center py-0.5">
-                    <span className="text-zinc-400 font-medium">{attr.label}</span>
-                    <span className={`w-8 text-center font-mono py-0.5 rounded text-[10px] border ${getAttributeBadgeColor(val)}`}>
+                  <div key={idx} className="flex justify-between items-center">
+                    <span className="text-slate-600 font-bold text-xs">{attr.label}</span>
+                    <span className={`w-9 text-center font-mono py-1 rounded-md text-xs border-2 shadow-sm ${getAttributeBadgeColor(val)}`}>
                       {val}
                     </span>
                   </div>
@@ -209,10 +209,10 @@ export default function PlayerAttributeModal({
             {/* If Keeper, show some outfield technicals too as secondary */}
             {isGK && (
               <>
-                <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-zinc-900 text-zinc-500 font-bold uppercase tracking-wider text-[9px] mt-2">
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-slate-200 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
                   <span>Outfield Technical</span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {[
                     { name: "Passing", label: "Passing" },
                     { name: "First Touch", label: "First Touch" },
@@ -220,9 +220,9 @@ export default function PlayerAttributeModal({
                   ].map((attr, idx) => {
                     const val = getAttrVal(attr.name);
                     return (
-                      <div key={idx} className="flex justify-between items-center py-0.5">
-                        <span className="text-zinc-500 font-medium">{attr.label}</span>
-                        <span className={`w-8 text-center font-mono py-0.5 rounded text-[10px] border ${getAttributeBadgeColor(val)}`}>
+                      <div key={idx} className="flex justify-between items-center">
+                        <span className="text-slate-500 font-bold text-xs">{attr.label}</span>
+                        <span className={`w-9 text-center font-mono py-1 rounded-md text-xs border-2 shadow-sm ${getAttributeBadgeColor(val)}`}>
                           {val}
                         </span>
                       </div>

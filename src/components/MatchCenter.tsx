@@ -207,61 +207,61 @@ export default function MatchCenter({
     switch (event.type) {
       case 'goal':
         return {
-          container: "bg-saweria/10 text-saweria border-saweria/30 font-bold animate-goal-glow",
-          icon: "text-saweria",
+          container: "bg-emerald-50 text-emerald-700 border-emerald-200 font-bold animate-goal-glow shadow-sm",
+          icon: "text-emerald-500",
           badge: "⚽"
         };
       case 'card':
         return {
-          container: "bg-yellow-950/20 text-yellow-300 border-yellow-800/20",
-          icon: "text-yellow-400",
+          container: "bg-yellow-50 text-yellow-800 border-yellow-200 shadow-sm",
+          icon: "text-yellow-600",
           badge: "🟨"
         };
       case 'save':
         return {
-          container: "bg-emerald-950/15 text-emerald-300 border-emerald-800/20",
-          icon: "text-emerald-400",
+          container: "bg-teal-50 text-teal-700 border-teal-200 shadow-sm",
+          icon: "text-teal-500",
           badge: "🧤"
         };
       case 'miss':
         return {
-          container: "bg-zinc-900/40 text-zinc-400 border-zinc-800/30",
-          icon: "text-zinc-500",
+          container: "bg-slate-50 text-slate-500 border-slate-200 shadow-sm",
+          icon: "text-slate-400",
           badge: "💨"
         };
       case 'counter':
         return {
-          container: "bg-red-950/15 text-red-300 border-red-800/20",
-          icon: "text-red-400",
+          container: "bg-rose-50 text-rose-700 border-rose-200 shadow-sm",
+          icon: "text-rose-500",
           badge: "⚡"
         };
       case 'penalty':
         return {
-          container: "bg-red-950/20 text-red-200 border-red-700/30 animate-penalty-drama",
-          icon: "text-red-400",
+          container: "bg-rose-100 text-rose-800 border-rose-300 animate-penalty-drama shadow-sm",
+          icon: "text-rose-600",
           badge: "🅿️"
         };
       case 'freekick':
         return {
-          container: "bg-blue-950/15 text-blue-300 border-blue-800/20",
-          icon: "text-blue-400",
+          container: "bg-blue-50 text-blue-700 border-blue-200 shadow-sm",
+          icon: "text-blue-500",
           badge: "🎯"
         };
       case 'chance':
         return {
-          container: "bg-amber-950/10 text-amber-300 border-amber-800/15",
-          icon: "text-amber-400",
+          container: "bg-orange-50 text-orange-700 border-orange-200 shadow-sm",
+          icon: "text-orange-500",
           badge: "💥"
         };
       case 'buildup':
         return {
-          container: "bg-zinc-900/20 text-zinc-500 border-zinc-800/15 text-[10px]",
-          icon: "text-zinc-600",
+          container: "bg-slate-50 text-slate-600 border-slate-200 text-[10px] shadow-sm",
+          icon: "text-slate-400",
           badge: "🔄"
         };
       case 'injury_time':
         return {
-          container: "bg-rose-950/20 text-rose-300 border-rose-800/30 text-center font-bold",
+          container: "bg-rose-50 text-rose-600 border-rose-200 text-center font-bold shadow-sm",
           icon: "text-rose-400",
           badge: "⏱️"
         };
@@ -269,14 +269,14 @@ export default function MatchCenter({
       case 'fulltime':
       case 'kickoff':
         return {
-          container: "bg-zinc-900 text-white border-zinc-800/80 text-center font-bold italic",
+          container: "bg-slate-800 text-white border-slate-700 text-center font-bold italic shadow-md",
           icon: "",
           badge: event.type === 'kickoff' ? "📢" : event.type === 'halftime' ? "🏁" : "🔚"
         };
       default:
         return {
-          container: "bg-zinc-900/30 text-zinc-300 border-zinc-900/40",
-          icon: "text-zinc-500",
+          container: "bg-white text-slate-600 border-slate-200 shadow-sm",
+          icon: "text-slate-400",
           badge: "📋"
         };
     }
@@ -299,25 +299,25 @@ export default function MatchCenter({
 
     return (
       <div className="flex flex-col">
-        <div className="flex justify-between font-bold mb-1 text-zinc-300">
+        <div className="flex justify-between font-bold mb-1 text-slate-600">
           <span>{formatVal(home)}</span>
-          <span className="text-zinc-500 uppercase tracking-wider text-[10px]">{label}</span>
+          <span className="text-slate-400 uppercase tracking-wider text-[10px]">{label}</span>
           <span>{formatVal(away)}</span>
         </div>
-        <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden flex border border-zinc-850">
+        <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex border border-slate-200 shadow-inner">
           {total > 0 ? (
             <>
               <div
-                className="bg-saweria h-full transition-all duration-500"
+                className="bg-emerald-400 h-full transition-all duration-500"
                 style={{ width: `${homeWidth}%` }}
               />
               <div
-                className="bg-zinc-700 h-full transition-all duration-500"
+                className="bg-blue-400 h-full transition-all duration-500"
                 style={{ width: `${100 - homeWidth}%` }}
               />
             </>
           ) : (
-            <div className="w-1/2 bg-zinc-850 h-full" />
+            <div className="w-1/2 bg-slate-300 h-full" />
           )}
         </div>
       </div>
@@ -325,33 +325,33 @@ export default function MatchCenter({
   };
 
   return (
-    <div className="bg-zinc-950 border border-zinc-850 rounded-2xl overflow-hidden shadow-2xl flex flex-col w-full max-w-3xl mx-auto h-[85vh] sm:h-[80vh] relative">
+    <div className="bg-white border-2 border-slate-200 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col w-full max-w-3xl mx-auto h-[85vh] sm:h-[80vh] relative">
 
       {/* ═══ Goal Flash Overlay ═══ */}
       {goalFlashActive && (
-        <div className="absolute inset-0 bg-saweria/30 z-50 pointer-events-none animate-goal-flash rounded-2xl" />
+        <div className="absolute inset-0 bg-emerald-500/20 z-50 pointer-events-none animate-goal-flash rounded-[2rem]" />
       )}
 
       {/* ═══ Scoreboard Panel ═══ */}
-      <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 p-5 border-b border-zinc-900 text-center relative">
-        <div className="absolute top-3 left-4 flex gap-1.5 items-center">
-          <span className={`w-2.5 h-2.5 rounded-full ${currentMinute >= totalMatchMinutes ? 'bg-zinc-500' : isInInjuryTime ? 'bg-red-500 animate-pulse' : 'bg-saweria animate-pulse'}`} />
-          <span className={`text-[10px] uppercase font-bold tracking-widest ${currentMinute >= totalMatchMinutes ? 'text-zinc-500' : isInInjuryTime ? 'text-red-400' : 'text-saweria'}`}>
-            {currentMinute >= totalMatchMinutes ? "Selesai" : isInInjuryTime ? "Injury Time" : "Simulasi Live"}
+      <div className="bg-gradient-to-b from-slate-50 to-white p-5 border-b-2 border-slate-100 text-center relative shadow-sm z-10">
+        <div className="absolute top-4 left-5 flex gap-1.5 items-center bg-white border border-slate-200 px-2 py-1 rounded-full shadow-sm">
+          <span className={`w-2.5 h-2.5 rounded-full ${currentMinute >= totalMatchMinutes ? 'bg-slate-400' : isInInjuryTime ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500 animate-pulse'}`} />
+          <span className={`text-[10px] uppercase font-bold tracking-widest ${currentMinute >= totalMatchMinutes ? 'text-slate-500' : isInInjuryTime ? 'text-rose-600' : 'text-emerald-600'}`}>
+            {currentMinute >= totalMatchMinutes ? "Selesai" : isInInjuryTime ? "Injury Time" : "Live"}
           </span>
         </div>
 
-        <div className="flex items-center justify-between max-w-md mx-auto mt-2">
+        <div className="flex items-center justify-between max-w-md mx-auto mt-3">
           {/* Home Team */}
           <div className="flex flex-col items-center flex-1 min-w-0">
-            <div className="w-12 h-12 bg-zinc-850 border border-zinc-800 rounded-full flex items-center justify-center text-zinc-400 font-bold uppercase mb-2">
+            <div className="w-14 h-14 bg-emerald-50 border-2 border-emerald-200 rounded-full flex items-center justify-center text-emerald-600 font-black text-lg uppercase mb-2 shadow-sm">
               {homeName.substring(0, 2)}
             </div>
-            <span className="text-white text-xs sm:text-sm font-bold truncate w-full">
+            <span className="text-slate-800 text-xs sm:text-base font-black truncate w-full uppercase tracking-wide">
               {homeName}
             </span>
             {simulatedMatch.homeFormation && (
-              <span className="text-[9px] text-zinc-500 font-mono mt-0.5">
+              <span className="text-[10px] text-slate-500 font-bold mt-1 bg-slate-100 px-2 py-0.5 rounded-full">
                 {simulatedMatch.homeFormation}
               </span>
             )}
@@ -359,19 +359,19 @@ export default function MatchCenter({
 
           {/* Current Score */}
           <div className="flex flex-col items-center px-4 shrink-0">
-            <div className="flex items-center justify-center gap-4 text-4xl sm:text-5xl font-black text-white font-mono tracking-tighter">
-              <span className={scorePulseTeam === 'home' ? 'animate-score-pulse' : ''}>
+            <div className="flex items-center justify-center gap-4 text-4xl sm:text-6xl font-black text-slate-800 font-mono tracking-tighter">
+              <span className={scorePulseTeam === 'home' ? 'text-emerald-500 animate-score-pulse' : ''}>
                 {currentHomeScore}
               </span>
-              <span className="text-zinc-700 text-3xl font-light">-</span>
-              <span className={scorePulseTeam === 'away' ? 'animate-score-pulse' : ''}>
+              <span className="text-slate-300 text-3xl font-light">-</span>
+              <span className={scorePulseTeam === 'away' ? 'text-blue-500 animate-score-pulse' : ''}>
                 {currentAwayScore}
               </span>
             </div>
-            <div className={`mt-2 text-xs font-bold px-3 py-1 rounded-full border font-mono ${
+            <div className={`mt-2 text-xs font-bold px-4 py-1.5 rounded-full border-2 font-mono shadow-sm ${
               isInInjuryTime
-                ? "text-red-400 bg-red-950/20 border-red-800/30"
-                : "text-saweria bg-saweria/10 border-saweria/20"
+                ? "text-rose-600 bg-rose-50 border-rose-200"
+                : "text-emerald-700 bg-emerald-50 border-emerald-200"
             }`}>
               {currentMinute >= totalMatchMinutes ? 'FT' : `${currentMinute}'`}
             </div>
@@ -379,14 +379,14 @@ export default function MatchCenter({
 
           {/* Away Team */}
           <div className="flex flex-col items-center flex-1 min-w-0">
-            <div className="w-12 h-12 bg-zinc-850 border border-zinc-800 rounded-full flex items-center justify-center text-zinc-400 font-bold uppercase mb-2">
+            <div className="w-14 h-14 bg-blue-50 border-2 border-blue-200 rounded-full flex items-center justify-center text-blue-600 font-black text-lg uppercase mb-2 shadow-sm">
               {awayName.substring(0, 2)}
             </div>
-            <span className="text-white text-xs sm:text-sm font-bold truncate w-full">
+            <span className="text-slate-800 text-xs sm:text-base font-black truncate w-full uppercase tracking-wide">
               {awayName}
             </span>
             {simulatedMatch.awayFormation && (
-              <span className="text-[9px] text-zinc-500 font-mono mt-0.5">
+              <span className="text-[10px] text-slate-500 font-bold mt-1 bg-slate-100 px-2 py-0.5 rounded-full">
                 {simulatedMatch.awayFormation}
               </span>
             )}
@@ -395,17 +395,17 @@ export default function MatchCenter({
 
         {/* ═══ Goalscorer Strip ═══ */}
         {(goalscorers.home.length > 0 || goalscorers.away.length > 0) && (
-          <div className="flex justify-between max-w-md mx-auto mt-3 text-[10px] text-zinc-400 gap-4">
+          <div className="flex justify-between max-w-md mx-auto mt-4 text-[11px] font-bold text-slate-500 gap-4">
             <div className="flex-1 text-left space-x-1 truncate">
               {goalscorers.home.map((g, i) => (
-                <span key={i} className="text-saweria/80">
+                <span key={i} className="text-emerald-600">
                   ⚽ {g.player} {g.minute}&apos;{i < goalscorers.home.length - 1 ? ',' : ''}
                 </span>
               ))}
             </div>
             <div className="flex-1 text-right space-x-1 truncate">
               {goalscorers.away.map((g, i) => (
-                <span key={i} className="text-saweria/80">
+                <span key={i} className="text-blue-600">
                   ⚽ {g.player} {g.minute}&apos;{i < goalscorers.away.length - 1 ? ',' : ''}
                 </span>
               ))}
@@ -414,17 +414,17 @@ export default function MatchCenter({
         )}
 
         {/* ═══ Progress Bar with Markers ═══ */}
-        <div className="w-full bg-zinc-900 h-2 rounded-full mt-4 overflow-visible relative border border-zinc-850">
+        <div className="w-full bg-slate-200 h-3 rounded-full mt-5 overflow-visible relative border border-slate-300 shadow-inner">
           {/* Halftime marker */}
           <div
-            className="absolute top-0 bottom-0 w-px bg-zinc-600 z-10"
+            className="absolute top-0 bottom-0 w-px bg-slate-400 z-10"
             style={{ left: `${(45 / totalMatchMinutes) * 100}%` }}
           />
 
           {/* Injury time zone (after 90') */}
           {totalMatchMinutes > 90 && (
             <div
-              className="absolute top-0 bottom-0 bg-red-900/30 rounded-r-full animate-injury-pulse z-0"
+              className="absolute top-0 bottom-0 bg-rose-200 rounded-r-full animate-injury-pulse z-0"
               style={{
                 left: `${(90 / totalMatchMinutes) * 100}%`,
                 width: `${((totalMatchMinutes - 90) / totalMatchMinutes) * 100}%`
@@ -436,8 +436,8 @@ export default function MatchCenter({
           <div
             className={`h-full rounded-full transition-all duration-300 relative z-10 ${
               isInInjuryTime
-                ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                : "bg-saweria shadow-[0_0_8px_rgba(255,203,5,0.5)]"
+                ? "bg-rose-500 shadow-sm"
+                : "bg-emerald-400 shadow-sm"
             }`}
             style={{ width: `${progressPercentage}%` }}
           />
@@ -446,8 +446,8 @@ export default function MatchCenter({
           {goalMarkers.map((g, i) => (
             <div
               key={i}
-              className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white border-2 border-saweria z-20 shadow-[0_0_6px_rgba(255,203,5,0.6)]"
-              style={{ left: `${g.position}%`, marginLeft: '-5px' }}
+              className={`absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 z-20 shadow-md ${g.team === 'home' ? 'border-emerald-500' : 'border-blue-500'}`}
+              style={{ left: `${g.position}%`, marginLeft: '-7px' }}
               title={`Goal at ${g.minute}'`}
             />
           ))}
@@ -455,22 +455,22 @@ export default function MatchCenter({
       </div>
 
       {/* ═══ Simulator Control Toolbar ═══ */}
-      <div className="bg-zinc-900/40 p-3 border-b border-zinc-900 flex items-center justify-between text-xs px-6">
-        <div className="flex items-center gap-2">
+      <div className="bg-slate-50 p-4 border-b-2 border-slate-200 flex items-center justify-between text-xs px-6 shadow-sm">
+        <div className="flex items-center gap-3">
           {currentMinute < totalMatchMinutes && (
             <>
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="p-1.5 rounded bg-zinc-800 hover:bg-zinc-750 text-white font-semibold transition-colors"
+                className="p-2.5 rounded-xl bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-black transition-all shadow-sm"
               >
-                {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                {isPlaying ? <Pause className="w-5 h-5 text-emerald-500" /> : <Play className="w-5 h-5 text-emerald-500" />}
               </button>
               <button
                 onClick={handleSkipToEnd}
-                className="p-1.5 rounded bg-zinc-800 hover:bg-zinc-750 text-white font-semibold transition-colors flex items-center gap-1"
+                className="p-2.5 rounded-xl bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 font-bold transition-all flex items-center gap-2 shadow-sm"
                 title="Langsung ke Skor Akhir"
               >
-                <FastForward className="w-4 h-4" />
+                <FastForward className="w-5 h-5 text-blue-500" />
                 <span className="hidden sm:inline">Lewati</span>
               </button>
             </>
@@ -479,15 +479,15 @@ export default function MatchCenter({
 
         {/* Speed Selector */}
         {currentMinute < totalMatchMinutes && (
-          <div className="flex bg-zinc-950 border border-zinc-850 rounded p-0.5">
+          <div className="flex bg-slate-200 p-1 rounded-xl shadow-inner">
             {(['normal', 'fast'] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setSpeed(s)}
-                className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition-all ${
+                className={`px-4 py-2 rounded-lg text-xs font-black uppercase transition-all ${
                   speed === s
-                    ? "bg-saweria text-black"
-                    : "text-zinc-400 hover:text-white"
+                    ? "bg-white text-emerald-600 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
                 }`}
               >
                 {s === 'normal' ? '1x' : '4x'}
@@ -499,30 +499,30 @@ export default function MatchCenter({
         {currentMinute >= totalMatchMinutes && (
           <button
             onClick={handleFinish}
-            className="py-1.5 px-4 bg-saweria text-black font-extrabold rounded-lg hover:bg-saweria-light transition-all flex items-center gap-1.5 animate-pulse ml-auto shadow-lg shadow-saweria/15"
+            className="py-2.5 px-6 bg-emerald-500 text-white font-black rounded-xl hover:bg-emerald-400 transition-all flex items-center gap-2 animate-pulse ml-auto shadow-md shadow-emerald-200"
           >
-            <CheckCircle className="w-4 h-4" />
+            <CheckCircle className="w-5 h-5" />
             Selesai Pertandingan
           </button>
         )}
       </div>
 
       {/* ═══ Main Panel: Commentary + Stats ═══ */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-5 bg-zinc-950">
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-5 bg-white">
 
         {/* Live Commentary Column */}
-        <div className="md:col-span-3 border-r border-zinc-900 flex flex-col min-h-0">
-          <div className="bg-zinc-900/20 px-4 py-2 border-b border-zinc-900/60 flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5 text-saweria" />
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400">
+        <div className="md:col-span-3 border-r-2 border-slate-100 flex flex-col min-h-0 bg-slate-50/50">
+          <div className="bg-white px-5 py-3 border-b-2 border-slate-100 flex items-center gap-2">
+            <Flame className="w-4 h-4 text-orange-500" />
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-600">
               Komentar Jalannya Laga
             </span>
-            <span className="ml-auto text-[9px] text-zinc-600 font-mono">
+            <span className="ml-auto text-[10px] text-slate-400 font-bold bg-slate-100 px-2 py-1 rounded-md">
               {visibleEvents.length} events
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-2.5 font-sans scrollbar-thin">
+          <div className="flex-1 overflow-y-auto p-5 space-y-3 font-sans scrollbar-thin">
             {visibleEvents.map((event, idx) => {
               const style = getEventStyle(event);
               const isSystemEvent = ['kickoff', 'halftime', 'fulltime', 'injury_time'].includes(event.type);
@@ -531,31 +531,31 @@ export default function MatchCenter({
               return (
                 <div
                   key={idx}
-                  className={`p-3 rounded-xl border text-xs leading-relaxed flex gap-2.5 transition-all duration-300 ${style.container} ${isNewEvent ? 'animate-slide-up' : ''}`}
+                  className={`p-4 rounded-2xl border-2 text-sm leading-relaxed flex gap-3 transition-all duration-300 ${style.container} ${isNewEvent ? 'animate-slide-up shadow-md transform -translate-y-1' : 'opacity-80'}`}
                 >
                   {/* Badge + Time */}
                   {!isSystemEvent && (
-                    <div className="flex flex-col items-center shrink-0 gap-0.5">
-                      <span className="text-sm">{style.badge}</span>
-                      <span className={`font-mono font-bold text-[10px] ${style.icon}`}>
+                    <div className="flex flex-col items-center shrink-0 gap-1 bg-white/50 rounded-xl p-2 min-w-[3rem]">
+                      <span className="text-xl">{style.badge}</span>
+                      <span className={`font-mono font-black text-xs ${style.icon}`}>
                         {event.minute}&apos;
                       </span>
                     </div>
                   )}
                   {isSystemEvent && (
-                    <span className="text-sm shrink-0">{style.badge}</span>
+                    <span className="text-xl shrink-0">{style.badge}</span>
                   )}
-                  <div className="flex-1">
+                  <div className="flex-1 pt-1 font-medium">
                     {event.text}
                     {/* Assist credit */}
                     {event.type === 'goal' && event.assist && (
-                      <div className="mt-1 text-[10px] text-saweria/60 font-medium">
+                      <div className="mt-2 text-[11px] text-emerald-600 font-black bg-emerald-100/50 inline-block px-2 py-1 rounded-lg">
                         🅰️ Assist: {event.assist}
                       </div>
                     )}
                     {/* xG badge for shots */}
                     {event.xg !== undefined && event.xg > 0 && (
-                      <span className="ml-2 text-[9px] text-zinc-500 font-mono bg-zinc-900/60 px-1.5 py-0.5 rounded">
+                      <span className="ml-2 text-[10px] text-slate-500 font-mono font-bold bg-white border border-slate-200 px-2 py-1 rounded-lg shadow-sm">
                         xG {event.xg.toFixed(2)}
                       </span>
                     )}
@@ -568,14 +568,14 @@ export default function MatchCenter({
         </div>
 
         {/* ═══ Live Match Stats Column ═══ */}
-        <div className="md:col-span-2 p-4 flex flex-col justify-start bg-zinc-950/40 overflow-y-auto scrollbar-thin">
-          <div className="bg-zinc-900/20 px-2.5 py-1.5 rounded-lg border border-zinc-900/60 mb-4 text-center">
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400">
+        <div className="md:col-span-2 p-6 flex flex-col justify-start bg-white overflow-y-auto scrollbar-thin">
+          <div className="bg-slate-50 px-4 py-2.5 rounded-xl border-2 border-slate-100 mb-6 text-center shadow-sm">
+            <span className="text-xs font-black uppercase tracking-widest text-slate-600">
               Statistik Laga
             </span>
           </div>
 
-          <div className="space-y-3.5 text-xs font-sans">
+          <div className="space-y-5 text-sm font-sans">
             <StatBar label="Penguasaan Bola" home={currentStats.possession[0]} away={currentStats.possession[1]} format="percent" />
             <StatBar label="xG" home={currentStats.xg[0]} away={currentStats.xg[1]} format="decimal" />
             <StatBar label="Total Tembakan" home={currentStats.shots[0]} away={currentStats.shots[1]} />

@@ -5,15 +5,15 @@ export const FORMATIONS: Record<string, Formation> = {
     name: "4-3-3",
     slots: [
       { position: "GK", x: 50, y: 88 },
-      { position: "DL", x: 15, y: 68 },
-      { position: "DC", x: 38, y: 72 },
-      { position: "DC", x: 62, y: 72 },
-      { position: "DR", x: 85, y: 68 },
-      { position: "MC", x: 30, y: 48 },
-      { position: "MC", x: 50, y: 52 },
-      { position: "MC", x: 70, y: 48 },
-      { position: "AML", x: 20, y: 25 },
-      { position: "AMR", x: 80, y: 25 },
+      { position: "LB", x: 15, y: 68 },
+      { position: "CB", x: 38, y: 72 },
+      { position: "CB", x: 62, y: 72 },
+      { position: "RB", x: 85, y: 68 },
+      { position: "CM", x: 30, y: 48 },
+      { position: "CM", x: 50, y: 52 },
+      { position: "CM", x: 70, y: 48 },
+      { position: "LW", x: 20, y: 25 },
+      { position: "RW", x: 80, y: 25 },
       { position: "ST", x: 50, y: 16 }
     ]
   },
@@ -21,14 +21,14 @@ export const FORMATIONS: Record<string, Formation> = {
     name: "4-4-2",
     slots: [
       { position: "GK", x: 50, y: 88 },
-      { position: "DL", x: 15, y: 68 },
-      { position: "DC", x: 38, y: 72 },
-      { position: "DC", x: 62, y: 72 },
-      { position: "DR", x: 85, y: 68 },
-      { position: "ML", x: 15, y: 45 },
-      { position: "MC", x: 38, y: 48 },
-      { position: "MC", x: 62, y: 48 },
-      { position: "MR", x: 85, y: 45 },
+      { position: "LB", x: 15, y: 68 },
+      { position: "CB", x: 38, y: 72 },
+      { position: "CB", x: 62, y: 72 },
+      { position: "RB", x: 85, y: 68 },
+      { position: "LM", x: 15, y: 45 },
+      { position: "CM", x: 38, y: 48 },
+      { position: "CM", x: 62, y: 48 },
+      { position: "RM", x: 85, y: 45 },
       { position: "ST", x: 35, y: 18 },
       { position: "ST", x: 65, y: 18 }
     ]
@@ -37,14 +37,14 @@ export const FORMATIONS: Record<string, Formation> = {
     name: "3-5-2",
     slots: [
       { position: "GK", x: 50, y: 88 },
-      { position: "DC", x: 25, y: 72 },
-      { position: "DC", x: 50, y: 75 },
-      { position: "DC", x: 75, y: 72 },
-      { position: "DM", x: 50, y: 60 },
-      { position: "ML", x: 15, y: 45 },
-      { position: "MC", x: 32, y: 48 },
-      { position: "MC", x: 68, y: 48 },
-      { position: "MR", x: 85, y: 45 },
+      { position: "CB", x: 25, y: 72 },
+      { position: "CB", x: 50, y: 75 },
+      { position: "CB", x: 75, y: 72 },
+      { position: "CDM", x: 50, y: 60 },
+      { position: "LM", x: 15, y: 45 },
+      { position: "CM", x: 32, y: 48 },
+      { position: "CM", x: 68, y: 48 },
+      { position: "RM", x: 85, y: 45 },
       { position: "ST", x: 35, y: 18 },
       { position: "ST", x: 65, y: 18 }
     ]
@@ -53,15 +53,15 @@ export const FORMATIONS: Record<string, Formation> = {
     name: "4-2-3-1",
     slots: [
       { position: "GK", x: 50, y: 88 },
-      { position: "DL", x: 15, y: 68 },
-      { position: "DC", x: 38, y: 72 },
-      { position: "DC", x: 62, y: 72 },
-      { position: "DR", x: 85, y: 68 },
-      { position: "DM", x: 35, y: 58 },
-      { position: "DM", x: 65, y: 58 },
-      { position: "AML", x: 20, y: 35 },
-      { position: "AMC", x: 50, y: 35 },
-      { position: "AMR", x: 80, y: 35 },
+      { position: "LB", x: 15, y: 68 },
+      { position: "CB", x: 38, y: 72 },
+      { position: "CB", x: 62, y: 72 },
+      { position: "RB", x: 85, y: 68 },
+      { position: "CDM", x: 35, y: 58 },
+      { position: "CDM", x: 65, y: 58 },
+      { position: "LW", x: 20, y: 35 },
+      { position: "CAM", x: 50, y: 35 },
+      { position: "RW", x: 80, y: 35 },
       { position: "ST", x: 50, y: 16 }
     ]
   },
@@ -69,14 +69,14 @@ export const FORMATIONS: Record<string, Formation> = {
     name: "5-3-2",
     slots: [
       { position: "GK", x: 50, y: 88 },
-      { position: "DL", x: 15, y: 68 },
-      { position: "DC", x: 32, y: 72 },
-      { position: "DC", x: 50, y: 75 },
-      { position: "DC", x: 68, y: 72 },
-      { position: "DR", x: 85, y: 68 },
-      { position: "MC", x: 30, y: 48 },
-      { position: "MC", x: 50, y: 52 },
-      { position: "MC", x: 70, y: 48 },
+      { position: "LB", x: 15, y: 68 },
+      { position: "CB", x: 32, y: 72 },
+      { position: "CB", x: 50, y: 75 },
+      { position: "CB", x: 68, y: 72 },
+      { position: "RB", x: 85, y: 68 },
+      { position: "CM", x: 30, y: 48 },
+      { position: "CM", x: 50, y: 52 },
+      { position: "CM", x: 70, y: 48 },
       { position: "ST", x: 35, y: 18 },
       { position: "ST", x: 65, y: 18 }
     ]
@@ -86,17 +86,17 @@ export const FORMATIONS: Record<string, Formation> = {
 // Maps tactical slot positions to player positions in JSON (case-insensitive)
 export const POSITION_MAP: Record<string, string[]> = {
   'GK': ['gk'],
-  'DC': ['dc'],
-  'DR': ['dr', 'wbr'],
-  'DL': ['dl', 'wbl'],
-  'MC': ['mc', 'dm', 'amc'],
-  'DM': ['dm', 'mc'],
-  'AMC': ['amc', 'mc', 'aml', 'amr'],
-  'MR': ['mr', 'amr', 'mc', 'ml'],
-  'ML': ['ml', 'aml', 'mc', 'mr'],
-  'AMR': ['amr', 'mr', 'st', 'amc'],
-  'AML': ['aml', 'ml', 'st', 'amc'],
-  'ST': ['st', 'aml', 'amr']
+  'CB': ['cb', 'dc'],
+  'RB': ['rb', 'dr', 'rwb', 'wbr'],
+  'LB': ['lb', 'dl', 'lwb', 'wbl'],
+  'CM': ['cm', 'mc', 'cdm', 'dm', 'cam', 'amc'],
+  'CDM': ['cdm', 'dm', 'cm', 'mc'],
+  'CAM': ['cam', 'amc', 'cm', 'mc', 'lw', 'aml', 'rw', 'amr'],
+  'RM': ['rm', 'mr', 'rw', 'amr', 'cm', 'mc'],
+  'LM': ['lm', 'ml', 'lw', 'aml', 'cm', 'mc'],
+  'RW': ['rw', 'amr', 'rm', 'mr', 'st', 'cam', 'amc'],
+  'LW': ['lw', 'aml', 'lm', 'ml', 'st', 'cam', 'amc'],
+  'ST': ['st', 'cf', 'lw', 'aml', 'rw', 'amr']
 };
 
 /**
@@ -172,22 +172,22 @@ export function calculateTacticalMatchup(homeFormation: string, awayFormation: s
   
   if (!homeFormation || !awayFormation) return mods;
 
-  // Midfield overload check (e.g. 3-5-2 beats 4-3-3 in midfield)
-  const homeMidCount = FORMATIONS[homeFormation]?.slots.filter(s => ['MC', 'DM', 'AMC', 'ML', 'MR'].includes(s.position)).length || 0;
-  const awayMidCount = FORMATIONS[awayFormation]?.slots.filter(s => ['MC', 'DM', 'AMC', 'ML', 'MR'].includes(s.position)).length || 0;
+  // Midfield overload check
+  const homeMidCount = FORMATIONS[homeFormation]?.slots.filter(s => ['CM', 'CDM', 'CAM', 'LM', 'RM'].includes(s.position)).length || 0;
+  const awayMidCount = FORMATIONS[awayFormation]?.slots.filter(s => ['CM', 'CDM', 'CAM', 'LM', 'RM'].includes(s.position)).length || 0;
   
   if (homeMidCount > awayMidCount) mods.homeMid += 0.10;
   else if (awayMidCount > homeMidCount) mods.awayMid += 0.10;
 
-  // Wing attack vs 3 at the back check (e.g. 4-3-3 wingers exploit 3-5-2)
-  const hasWingers = (f: string) => FORMATIONS[f]?.slots.some(s => ['AML', 'AMR'].includes(s.position));
-  const hasThreeAtBack = (f: string) => FORMATIONS[f]?.slots.filter(s => ['DC', 'DL', 'DR', 'WBL', 'WBR'].includes(s.position)).length === 3;
+  // Wing attack vs 3 at the back check
+  const hasWingers = (f: string) => FORMATIONS[f]?.slots.some(s => ['LW', 'RW'].includes(s.position));
+  const hasThreeAtBack = (f: string) => FORMATIONS[f]?.slots.filter(s => ['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(s.position)).length === 3;
 
   if (hasWingers(homeFormation) && hasThreeAtBack(awayFormation)) mods.homeAtt += 0.10;
   if (hasWingers(awayFormation) && hasThreeAtBack(homeFormation)) mods.awayAtt += 0.10;
 
-  // Park the bus (5 at the back gives def bonus but att penalty)
-  const isParkBus = (f: string) => FORMATIONS[f]?.slots.filter(s => ['DC', 'DL', 'DR', 'WBL', 'WBR'].includes(s.position)).length >= 5;
+  // Park the bus
+  const isParkBus = (f: string) => FORMATIONS[f]?.slots.filter(s => ['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(s.position)).length >= 5;
   if (isParkBus(homeFormation)) { mods.homeDef += 0.15; mods.homeAtt -= 0.10; }
   if (isParkBus(awayFormation)) { mods.awayDef += 0.15; mods.awayAtt -= 0.10; }
 
