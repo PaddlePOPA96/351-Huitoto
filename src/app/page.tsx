@@ -309,7 +309,9 @@ export default function GamePage() {
       return prev.map(s => {
         if (s.id === slotId) {
           if (s.gachaCount === 0) {
-            const choices = draw10ChoicesForPosition(playersByPosition[s.position] || [], draftedNames);
+            const leagueClubs = [...(LEAGUE_CLUBS[domesticLeague] || []), "Free Agent"];
+            const pool = (playersByPosition[s.position] || []).filter(p => leagueClubs.includes(p.club || "Free Agent"));
+            const choices = draw10ChoicesForPosition(pool, draftedNames);
             return { ...s, choices, gachaCount: 1 };
           }
         }
@@ -317,14 +319,16 @@ export default function GamePage() {
       });
     });
   };
-
+ 
   const handleReroll = (slotId: number) => {
     setDraftSlots(prev => {
       const draftedNames = prev.map(s => s.player?.name).filter((name): name is string => !!name);
       return prev.map(s => {
         if (s.id === slotId) {
           if (s.gachaCount < 2) {
-            const choices = draw10ChoicesForPosition(playersByPosition[s.position] || [], draftedNames);
+            const leagueClubs = [...(LEAGUE_CLUBS[domesticLeague] || []), "Free Agent"];
+            const pool = (playersByPosition[s.position] || []).filter(p => leagueClubs.includes(p.club || "Free Agent"));
+            const choices = draw10ChoicesForPosition(pool, draftedNames);
             return { ...s, choices, gachaCount: s.gachaCount + 1 };
           }
         }

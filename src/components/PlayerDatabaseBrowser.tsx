@@ -130,11 +130,11 @@ export default function PlayerDatabaseBrowser({
     
     // Apply search query
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
+      const query = normalizeString(searchQuery);
       basePlayers = basePlayers.filter(p => 
-        p.name.toLowerCase().includes(query) ||
-        p.position.toLowerCase().includes(query) ||
-        p.role.toLowerCase().includes(query)
+        normalizeString(p.name).includes(query) ||
+        normalizeString(p.position).includes(query) ||
+        normalizeString(p.role).includes(query)
       );
     }
     
@@ -154,6 +154,9 @@ export default function PlayerDatabaseBrowser({
     if (minRatingFilter > 0) {
       basePlayers = basePlayers.filter(p => normalizeRating(p.rat) >= minRatingFilter);
     }
+
+    // Sort players by rating descending
+    basePlayers.sort((a, b) => normalizeRating(b.rat) - normalizeRating(a.rat));
 
     return basePlayers;
   }, [playersData, playersByNation, viewMode, selectedGroup, searchQuery, positionFilter, minRatingFilter]);
