@@ -14,6 +14,7 @@ import FootballPitch from "../components/FootballPitch";
 import DraftSelectionModal from "../components/DraftSelectionModal";
 import LeagueTable from "../components/LeagueTable";
 import MatchCenter from "../components/MatchCenter";
+import PlayerDatabaseBrowser from "../components/PlayerDatabaseBrowser";
 import { 
   Play, 
   Flame, 
@@ -134,6 +135,7 @@ export default function GamePage() {
 
   // --- Game State ---
   const [screen, setScreen] = useState<'welcome' | 'formation' | 'draft' | 'league' | 'match' | 'end'>('welcome');
+  const [currentTab, setCurrentTab] = useState<'play' | 'database'>('play');
   const [selectedFormationName, setSelectedFormationName] = useState<string>("4-3-3");
   const [draftSlots, setDraftSlots] = useState<DraftSlot[]>([]);
   
@@ -901,7 +903,37 @@ export default function GamePage() {
       {/* Main Container */}
       <main className="flex-1 flex flex-col p-4 sm:p-6 max-w-7xl w-full mx-auto justify-center">
 
-        {/* SCREEN 1: WELCOME SCREEN */}
+        {/* TOP LEVEL TABS */}
+        <div className="flex justify-center gap-4 mb-6">
+          <button
+            onClick={() => setCurrentTab('play')}
+            className={`px-6 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex items-center gap-2 ${
+              currentTab === 'play'
+                ? "bg-saweria text-black shadow-lg shadow-saweria/20"
+                : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800"
+            }`}
+          >
+            <Play className="w-4 h-4" />
+            Play
+          </button>
+          <button
+            onClick={() => setCurrentTab('database')}
+            className={`px-6 py-2 rounded-xl font-bold uppercase text-xs tracking-wider transition-all flex items-center gap-2 ${
+              currentTab === 'database'
+                ? "bg-saweria text-black shadow-lg shadow-saweria/20"
+                : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800"
+            }`}
+          >
+            <Search className="w-4 h-4" />
+            Database Pemain
+          </button>
+        </div>
+
+        {currentTab === 'database' ? (
+          <PlayerDatabaseBrowser playersData={playersData} clubsList={clubsList} />
+        ) : (
+          <>
+            {/* SCREEN 1: WELCOME SCREEN */}
         {screen === 'welcome' && (
           <div className="flex flex-col items-center text-center max-w-2xl mx-auto py-12 gap-8 animate-fade-in">
             {/* Saweria Yellow Accent Badge */}
@@ -1890,6 +1922,8 @@ export default function GamePage() {
               );
             })()}
           </div>
+        )}
+        </>
         )}
 
       </main>
