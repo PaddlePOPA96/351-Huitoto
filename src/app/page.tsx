@@ -1375,7 +1375,7 @@ export default function GamePage() {
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
                       <Calendar className="w-4 h-4 text-emerald-500" />
-                      Pekan Kompetisi {currentRoundIdx + 1}
+                      Pekan Kompetisi {currentRoundIdx + 1} / {fixtures.length}
                     </span>
                     <span className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded font-black">
                       NEXT MATCH
@@ -1418,43 +1418,55 @@ export default function GamePage() {
                   {/* Simulation launcher */}
                   <div className="flex flex-col gap-3 mt-2">
                     <button
-                      onClick={handleStartMatchSimulation}
+                      onClick={handleSkipSeason}
                       disabled={isSimulatingSeason}
                       className="w-full py-3.5 bg-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 disabled:border disabled:border-slate-200 disabled:cursor-not-allowed text-white font-black uppercase text-xs sm:text-sm rounded-xl hover:bg-emerald-400 active:translate-y-0 hover:-translate-y-1 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2"
                     >
                       <Play className="w-4 h-4 fill-white" />
-                      {isSimulatingSeason ? "Simulasi Sedang Berjalan..." : "Simulasikan Pertandingan"}
-                    </button>
-                    <button
-                      onClick={handleSkipSeason}
-                      disabled={isSimulatingSeason}
-                      className="w-full py-2.5 bg-white border-2 border-slate-200 hover:bg-slate-50 hover:border-slate-300 disabled:bg-slate-50 disabled:text-slate-400 disabled:border-slate-100 disabled:cursor-not-allowed text-slate-600 font-bold uppercase text-[10px] sm:text-xs rounded-xl active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm"
-                    >
-                      <FastForward className="w-3.5 h-3.5" />
-                      {isSimulatingSeason ? "Mensimulasikan Sisa Musim..." : "Simulasikan Sisa Musim (Skip)"}
+                      {isSimulatingSeason ? "Simulasi Sedang Berjalan..." : "Simulasikan 1 Musim"}
                     </button>
                   </div>
 
                 </div>
               ) : (
                 // User has BYE in this round (since odd number of teams)
-                <div className="bg-white border-2 border-slate-200 shadow-sm rounded-2xl p-6 flex flex-col gap-4 text-center items-center justify-center">
-                  <ShieldAlert className="w-10 h-10 text-slate-300 animate-bounce mb-1" />
-                  <div className="flex flex-col">
+                <div className="bg-white border-2 border-slate-200 shadow-sm rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden">
+                  
+                  {/* Background glowing glow */}
+                  <div className="absolute -top-12 -right-12 w-32 h-32 bg-slate-100 rounded-full blur-2xl pointer-events-none" />
+
+                  {/* Header info */}
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-slate-400" />
+                      Pekan Kompetisi {currentRoundIdx + 1} / {fixtures.length}
+                    </span>
+                    <span className="text-[10px] text-slate-500 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded font-black">
+                      BYE WEEK
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col text-center items-center justify-center border-y border-slate-100 py-4 mt-1 font-sans">
+                    <ShieldAlert className="w-8 h-8 text-slate-300 animate-bounce mb-1" />
                     <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
                       Pekan Istirahat (BYE)
                     </h4>
-                    <p className="text-slate-500 font-medium text-xs leading-relaxed max-w-xs mt-1">
-                      Tim Anda tidak memiliki pertandingan pada pekan ini. Klik di bawah untuk mensimulasikan laga tim-tim AI lainnya secara instan.
+                    <p className="text-slate-500 font-medium text-[11px] leading-relaxed max-w-xs mt-1">
+                      Tim Anda tidak memiliki pertandingan pada pekan ini.
                     </p>
                   </div>
-                  <button
-                    onClick={simulateByeRound}
-                    disabled={isSimulatingSeason}
-                    className="w-full py-3 bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-xl transition-all mt-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-                  >
-                    {isSimulatingSeason ? "Mensimulasikan..." : "Simulasikan Pekan Ini"}
-                  </button>
+
+                  {/* Simulation launcher */}
+                  <div className="flex flex-col gap-3 mt-2">
+                    <button
+                      onClick={handleSkipSeason}
+                      disabled={isSimulatingSeason}
+                      className="w-full py-3.5 bg-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 disabled:border disabled:border-slate-200 disabled:cursor-not-allowed text-white font-black uppercase text-xs sm:text-sm rounded-xl hover:bg-emerald-400 active:translate-y-0 hover:-translate-y-1 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2"
+                    >
+                      <Play className="w-4 h-4 fill-white" />
+                      {isSimulatingSeason ? "Simulasi Sedang Berjalan..." : "Simulasikan 1 Musim"}
+                    </button>
+                  </div>
                 </div>
               )}
 
